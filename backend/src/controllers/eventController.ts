@@ -40,8 +40,25 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 
 export const approveEvent = async (req: AuthRequest, res: Response) => {
   try {
+    // Check authorization - only approvers can approve events
+    const allowedRoles = ['FACULTY_ADVISOR', 'DEPARTMENT_APPROVER', 'COLLEGE_ADMIN', 'SUPER_ADMIN'];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Only approvers can approve events' });
+    }
+
     const { id } = req.params;
     const { decision, comment, stage } = req.body;
+
+    // Validate event ID
+    if (!id) {
+      return res.status(400).json({ error: 'Event ID is required' });
+    }
+
+    // Verify event exists
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
 
     const approval = await Approval.create({
       eventId: id,
@@ -74,5 +91,44 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
     res.json(event);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateEvent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const event = await Event.findById(id);
+    
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    
+    // Only organizer can update their own event
+    if (event.organizerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Only event organizer can update this event' });
+    }
+
+    const payload = createEventSchema.partial().parse(req.body);
+    const updatedEvent = await Event.findByIdAndUpdate(id, payload, { new: true }).populate('organizerId');
+    res.json(updatedEvent);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+export const deleteEvent = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const event = await Event.findById(id);
+    
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    
+    // Only organizer can delete their own event
+    if (event.organizerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Only event organizer can delete this event' });
+    }
+
+    await Event.findByIdAndUpdate(id, { deleted: true });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
   }
 };

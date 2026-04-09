@@ -207,67 +207,75 @@ export default function DashboardPage() {
     </div>
   );
 
-  const renderStudentOrganizerDashboard = () => (
-    <div className="grid-layout">
-      <Card title="My Events" subtitle="Events you've organized">
-        <div className="stat-row">
-          <div>
-            <strong>{events.length}</strong>
-            <span>Total Events</span>
+  const renderStudentOrganizerDashboard = () => {
+    // Filter events to only show those organized by current user
+    const userEvents = events.filter((event: any) => event.organizerId === user?.id);
+    const userPending = userEvents.filter((event: any) => event.status === 'PENDING' || event.status === 'IN_REVIEW').length;
+    const userApproved = userEvents.filter((event: any) => event.status === 'APPROVED').length;
+    const userReports = reports.length; // In a real app, this would also be filtered
+    
+    return (
+      <div className="grid-layout">
+        <Card title="My Events" subtitle="Events you've organized">
+          <div className="stat-row">
+            <div>
+              <strong>{userEvents.length}</strong>
+              <span>Total Events</span>
+            </div>
+            <div>
+              <strong>{userApproved}</strong>
+              <span>Approved</span>
+            </div>
+            <div>
+              <strong>{userPending}</strong>
+              <span>Pending Approval</span>
+            </div>
+            <div>
+              <strong>{userReports}</strong>
+              <span>Completed</span>
+            </div>
           </div>
-          <div>
-            <strong>{approved}</strong>
-            <span>Approved</span>
-          </div>
-          <div>
-            <strong>{pending}</strong>
-            <span>Pending Approval</span>
-          </div>
-          <div>
-            <strong>{reports.length}</strong>
-            <span>Completed</span>
-          </div>
-        </div>
-      </Card>
+        </Card>
 
-      <Card title="Event Checklist" subtitle="Status of all your events">
-        <ul className="list-compact">
-          {events.slice(0, 6).map((event: { id: string; title: string; status: string; department: string }) => (
-            <li key={event.id}>
-              <div>
-                <strong>{event.title}</strong>
-                <p>{event.department}</p>
-              </div>
-              <Badge
-                variant={
-                  event.status === 'APPROVED'
-                    ? 'success'
-                    : event.status === 'REJECTED'
-                      ? 'danger'
-                      : 'info'
-                }
-              >
-                {event.status}
-              </Badge>
-            </li>
-          ))}
-        </ul>
-      </Card>
+        <Card title="Event Checklist" subtitle="Status of all your events">
+          <ul className="list-compact">
+            {userEvents.slice(0, 6).map((event: { id: string; title: string; status: string; department: string }) => (
+              <li key={event.id}>
+                <div>
+                  <strong>{event.title}</strong>
+                  <p>{event.department}</p>
+                </div>
+                <Badge
+                  variant={
+                    event.status === 'APPROVED'
+                      ? 'success'
+                      : event.status === 'REJECTED'
+                        ? 'danger'
+                        : 'info'
+                  }
+                >
+                  {event.status}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </Card>
 
-      <Card title="Notifications" subtitle="Updates on your events">
-        <ul className="list-compact">
-          {notifications.slice(0, 5).map((item: { id: string; title: string; message: string }) => (
-            <li key={item.id}>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.message}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
-    </div>
-  );
+        <Card title="Notifications" subtitle="Updates on your events">
+          <ul className="list-compact">
+            {notifications.slice(0, 5).map((item: { id: string; title: string; message: string }) => (
+              <li key={item.id}>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.message}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
+    );
+  };
 
   const renderVolunteerDashboard = () => (
     <div className="grid-layout">
@@ -321,73 +329,85 @@ export default function DashboardPage() {
     </div>
   );
 
-  const renderDepartmentApproverDashboard = () => (
-    <div className="grid-layout">
-      <Card title="Approval Workload" subtitle="Department submissions">
-        <div className="stat-row">
-          <div>
-            <strong>{pending}</strong>
-            <span>Pending</span>
-          </div>
-          <div>
-            <strong>32</strong>
-            <span>Approved</span>
-          </div>
-          <div>
-            <strong>8</strong>
-            <span>Rejected</span>
-          </div>
-          <div>
-            <strong>98%</strong>
-            <span>On-time Rate</span>
-          </div>
-        </div>
-      </Card>
+  const renderDepartmentApproverDashboard = () => {
+    // Calculate real statistics for department approver
+    const deptEvents = events.filter((e: any) => e.department === user?.department);
+    const deptPending = deptEvents.filter((e: any) => e.status === 'PENDING' || e.status === 'IN_REVIEW').length;
+    const deptApproved = deptEvents.filter((e: any) => e.status === 'APPROVED').length;
+    const deptRejected = deptEvents.filter((e: any) => e.status === 'REJECTED').length;
+    const deptTotal = deptEvents.length;
 
-      <Card title="Submissions Awaiting Review" subtitle="Action required">
-        <ul className="list-compact">
-          {approvals
-            .filter((a: { decision: string }) => a.decision === 'PENDING')
-            .slice(0, 8)
-            .map((approval: { id: string; eventId: string; stage: string }) => (
-              <li key={approval.id}>
-                <div>
-                  <strong>Event Submission</strong>
-                  <p>Stage: {approval.stage}</p>
-                </div>
-                <Badge variant="warning">Review</Badge>
-              </li>
-            ))}
-        </ul>
-      </Card>
+    return (
+      <div className="grid-layout">
+        <Card title="Approval Workload" subtitle={`${user?.department || 'Department'} submissions`}>
+          <div className="stat-row">
+            <div>
+              <strong>{deptPending}</strong>
+              <span>Pending</span>
+            </div>
+            <div>
+              <strong>{deptApproved}</strong>
+              <span>Approved</span>
+            </div>
+            <div>
+              <strong>{deptRejected}</strong>
+              <span>Rejected</span>
+            </div>
+            <div>
+              <strong>{deptTotal}</strong>
+              <span>Total</span>
+            </div>
+          </div>
+        </Card>
 
-      <Card title="Department Stats" subtitle="Performance overview">
-        <div className="chart-wrap">
-          <div className="bar-row">
-            <span>Avg Turnaround</span>
-            <div>
-              <i style={{ width: '85%' }} />
+        <Card title="Events Awaiting Review" subtitle="Action required">
+          <ul className="list-compact">
+            {events
+              .filter((e: any) => (e.status === 'PENDING' || e.status === 'IN_REVIEW') && e.department === user?.department)
+              .slice(0, 8)
+              .map((event: any) => (
+                <li key={event.id}>
+                  <div>
+                    <strong>{event.title}</strong>
+                    <p>🏫 {event.department} • Budget: INR {event.budget?.toLocaleString?.() ?? '0'}</p>
+                  </div>
+                  <Badge variant="warning">{event.status}</Badge>
+                </li>
+              ))}
+          </ul>
+          {deptPending === 0 && (
+            <p style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>No pending approvals for your department</p>
+          )}
+        </Card>
+
+        <Card title="Department Analytics" subtitle="Your approval metrics">
+          <div className="chart-wrap">
+            <div className="bar-row">
+              <span>Pending Rate</span>
+              <div>
+                <i style={{ width: `${deptTotal > 0 ? (deptPending / deptTotal) * 100 : 0}%` }} />
+              </div>
+              <strong>{deptTotal > 0 ? ((deptPending / deptTotal) * 100).toFixed(0) : 0}%</strong>
             </div>
-            <strong>2.1 days</strong>
-          </div>
-          <div className="bar-row">
-            <span>Approval Rate</span>
-            <div>
-              <i style={{ width: '92%' }} />
+            <div className="bar-row">
+              <span>Approval Rate</span>
+              <div>
+                <i style={{ width: `${deptTotal > 0 ? (deptApproved / deptTotal) * 100 : 0}%` }} />
+              </div>
+              <strong>{deptTotal > 0 ? ((deptApproved / deptTotal) * 100).toFixed(0) : 0}%</strong>
             </div>
-            <strong>92%</strong>
-          </div>
-          <div className="bar-row">
-            <span>Rejection Rate</span>
-            <div>
-              <i style={{ width: '8%' }} />
+            <div className="bar-row">
+              <span>Rejection Rate</span>
+              <div>
+                <i style={{ width: `${deptTotal > 0 ? (deptRejected / deptTotal) * 100 : 0}%` }} />
+              </div>
+              <strong>{deptTotal > 0 ? ((deptRejected / deptTotal) * 100).toFixed(0) : 0}%</strong>
             </div>
-            <strong>8%</strong>
           </div>
-        </div>
-      </Card>
-    </div>
-  );
+        </Card>
+      </div>
+    );
+  };
 
   // Render dashboard based on user role
   switch (user?.role) {

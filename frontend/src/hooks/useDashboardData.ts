@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import {
   mockApprovals,
@@ -16,11 +16,20 @@ export function useEventsData() {
     queryFn: async () => {
       try {
         const res = await api.get('/events');
-        return res.data;
-      } catch {
+        // Normalize _id to id for consistency
+        const events = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        return events.map((event: any) => ({
+          ...event,
+          id: event._id || event.id,
+        }));
+      } catch (error) {
+        console.error('Error fetching events:', error);
         return mockEvents;
       }
     },
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
   });
 }
 
@@ -28,6 +37,9 @@ export function useApprovalsData() {
   return useQuery({
     queryKey: ['approvals'],
     queryFn: async () => mockApprovals,
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
   });
 }
 
@@ -42,11 +54,40 @@ export function useVenuesData() {
         return mockVenues;
       }
     },
+    staleTime: 60000,
+    refetchOnWindowFocus: true,
   });
 }
 
 export function useTasksData() {
   const [tasks, setTasks] = useState(mockTasks);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Sync with backend on mount
+  useEffect(() => {
+    const syncTasks = async () => {
+      try {
+        setIsSyncing(true);
+        const token = localStorage.getItem('access_token');
+        const response = await fetch('http://localhost:4000/api/tasks', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setTasks(data);
+        }
+      } catch (error) {
+        console.error('Failed to sync tasks:', error);
+        // Use mock data as fallback
+      } finally {
+        setIsSyncing(false);
+      }
+    };
+
+    syncTasks();
+  }, []);
 
   const grouped = useMemo(
     () => ({
@@ -57,11 +98,58 @@ export function useTasksData() {
     [tasks],
   );
 
-  const updateStatus = (id: string, status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
+  const updateStatus = async (id: string, status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
+    // Update local state immediately
     setTasks(prev => prev.map(task => (task.id === id ? { ...task, status } : task)));
+
+    // Sync with backend
+    try {
+      const token = localStorage.getItem('access_token');
+      await fetch(`http://localhost:4000/api/tasks/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+    } catch (error) {
+      console.error('Failed to update task status:', error);
+    }
   };
 
-  return { tasks, grouped, updateStatus };
+  const addTask = async (newTask: { title: string; team: 'Media' | 'Logistics' | 'Tech' | 'Hospitality'; assignee: string; priority: 'Low' | 'Medium' | 'High' }) => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('http://localhost:4000/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newTask),
+      });
+
+      if (response.ok) {
+        const task = await response.json();
+        setTasks(prev => [...prev, task]);
+        return task;
+      }
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      // Fallback to local state
+      const task = {
+        id: Date.now().toString(),
+        ...newTask,
+        status: 'TODO' as const,
+        dueDate: new Date().toISOString().split('T')[0],
+      };
+      setTasks(prev => [...prev, task]);
+      return task;
+    }
+  };
+
+  return { tasks, grouped, updateStatus, addTask, setTasks, isSyncing };
 }
 
 export function useReportsData() {

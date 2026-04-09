@@ -4,6 +4,7 @@ import Button from '../../components/ui/Button';
 import AddVenueModal from '../../components/AddVenueModal';
 import EditVenueModal from '../../components/EditVenueModal';
 import DeleteVenueModal from '../../components/DeleteVenueModal';
+import RoleGuard from '../../components/RoleGuard';
 import { useVenuesData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 
@@ -41,7 +42,8 @@ export default function VenuesPage() {
   };
 
   return (
-    <div className="grid-layout">
+    <RoleGuard roles={['COLLEGE_ADMIN', 'SUPER_ADMIN']}>
+      <div className="grid-layout">
       {/* Header with Add Venue Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1>Venues Management</h1>
@@ -177,6 +179,7 @@ export default function VenuesPage() {
         }}
         onVenueDeleted={handleVenueDeleted}
       />
-    </div>
+      </div>
+    </RoleGuard>
   );
 }

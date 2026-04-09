@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       default: 'STUDENT_ORGANIZER',
     },
     collegeId: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },
+    department: { type: String },
     permissions: [String],
     isActive: { type: Boolean, default: true },
     deleted: { type: Boolean, default: false },
@@ -20,6 +21,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ email: 1 });
 userSchema.index({ collegeId: 1 });
+userSchema.index({ department: 1 });
 
 export const User = mongoose.model('User', userSchema);
 
@@ -114,16 +116,19 @@ const taskSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
+    organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
-    assigneeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     team: { type: String },
+    assignee: { type: String },
     status: { type: String, enum: ['TODO', 'IN_PROGRESS', 'DONE'], default: 'TODO' },
     priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
     dueDate: { type: Date },
+    deleted: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
 
+taskSchema.index({ organizerId: 1 });
 taskSchema.index({ eventId: 1 });
 
 export const Task = mongoose.model('Task', taskSchema);

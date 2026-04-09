@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 const allLinks = [
   { to: '/', label: 'Dashboard' },
   { to: '/events', label: 'Events' },
-  { to: '/approvals', label: 'Approvals' },
+  { to: '/approvals', label: 'Approvals', studentLabel: 'Proposed Events' },
   { to: '/venues', label: 'Venues' },
   { to: '/tasks', label: 'Tasks' },
   { to: '/reports', label: 'Reports' },
@@ -15,9 +15,9 @@ const roleNavigation: Record<string, string[]> = {
   SUPER_ADMIN: ['Dashboard', 'Events', 'Approvals', 'Venues', 'Tasks', 'Reports'],
   COLLEGE_ADMIN: ['Dashboard', 'Events', 'Approvals', 'Venues', 'Tasks', 'Reports'],
   FACULTY_ADVISOR: ['Dashboard', 'Approvals', 'Events', 'Reports'],
-  STUDENT_ORGANIZER: ['Dashboard', 'Events', 'Tasks', 'Approvals', 'Reports'],
+  STUDENT_ORGANIZER: ['Dashboard', 'Events', 'Proposed Events', 'Tasks', 'Reports'],
   VOLUNTEER: ['Dashboard', 'Tasks', 'Events'],
-  DEPARTMENT_APPROVER: ['Dashboard', 'Approvals', 'Reports'],
+  DEPARTMENT_APPROVER: ['Dashboard', 'Events', 'Approvals', 'Reports'],
 };
 
 export default function AppShell() {
@@ -27,7 +27,15 @@ export default function AppShell() {
   // Filter navigation links based on user role
   const userRole = user?.role || 'STUDENT_ORGANIZER';
   const allowedNavItems = roleNavigation[userRole] || [];
-  const filteredLinks = allLinks.filter(link => allowedNavItems.includes(link.label));
+  const filteredLinks = allLinks
+    .filter(link => {
+      const labelToUse = userRole === 'STUDENT_ORGANIZER' && link.studentLabel ? link.studentLabel : link.label;
+      return allowedNavItems.includes(labelToUse);
+    })
+    .map(link => ({
+      ...link,
+      displayLabel: userRole === 'STUDENT_ORGANIZER' && link.studentLabel ? link.studentLabel : link.label,
+    }));
 
   return (
     <div className="app-frame">
@@ -44,7 +52,7 @@ export default function AppShell() {
               to={link.to}
               className={({ isActive }) => (isActive ? 'nav-link nav-link-active' : 'nav-link')}
             >
-              {link.label}
+              {link.displayLabel}
             </NavLink>
           ))}
         </nav>
@@ -66,7 +74,7 @@ export default function AppShell() {
       <section className="content-shell">
         <header className="topbar">
           <div>
-            <h2>{filteredLinks.find(link => link.to === location.pathname)?.label || 'Overview'}</h2>
+            <h2>{filteredLinks.find(link => link.to === location.pathname)?.displayLabel || 'Overview'}</h2>
             <p>{user?.name} • {user?.email}</p>
           </div>
           <span className="badge badge-info">{user?.role?.replace(/_/g, ' ')}</span>

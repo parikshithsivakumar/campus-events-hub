@@ -14,6 +14,7 @@ export interface User {
   email: string;
   role: Role;
   collegeId: string;
+  department?: string;
 }
 
 export interface EventItem {
@@ -25,6 +26,7 @@ export interface EventItem {
   venue: string;
   department: string;
   organizer: string;
+  organizerId?: string;
   status: EventStatus;
   budget: number;
 }

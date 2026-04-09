@@ -14,9 +14,21 @@ export const generateReport = async (req: AuthRequest, res: Response) => {
 
 export const getReports = async (req: AuthRequest, res: Response) => {
   try {
-    const events = await Event.find({ collegeId: req.user.collegeId });
-    const eventIds = events.map(e => e._id);
-    const reports = await Report.find({ eventId: { $in: eventIds } }).populate('eventId');
+    let query: any = { collegeId: req.user.collegeId };
+    
+    // Student organizers only see reports for their own events
+    if (req.user.role === 'STUDENT_ORGANIZER') {
+      const userEvents = await Event.find({ organizerId: req.user._id, collegeId: req.user.collegeId });
+      const eventIds = userEvents.map(e => e._id);
+      query = { eventId: { $in: eventIds } };
+    } else {
+      // Others see all events in their college
+      const events = await Event.find({ collegeId: req.user.collegeId });
+      const eventIds = events.map(e => e._id);
+      query = { eventId: { $in: eventIds } };
+    }
+    
+    const reports = await Report.find(query).populate('eventId');
     res.json(reports);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
