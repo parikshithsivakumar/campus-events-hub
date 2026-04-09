@@ -37,13 +37,9 @@ export default function LoginPage() {
       login({ token: res.data.access, user: res.data.user });
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
-      // Fallback for demonstration
-      login({
-        token: 'local-dev-token',
-        user: { ...mockUser, email: data.email },
-      });
-      navigate('/');
+      const errorMsg = err.response?.data?.error || 'Login failed. Please try again.';
+      setError(errorMsg);
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
