@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useContext, useMemo, useState } from 'react';
+import { ReactNode, createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { Role, User } from '../types/models';
 import { mockUser } from '../utils/mockData';
 
@@ -12,10 +12,22 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Clean up invalid mock tokens
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (token && token === 'local-dev-token') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('auth_user');
+    }
+  }, []);
+
   const [token, setToken] = useState<string | null>(localStorage.getItem('access_token'));
   const [user, setUser] = useState<User | null>(() => {
     const raw = localStorage.getItem('auth_user');
-    return raw ? (JSON.parse(raw) as User) : mockUser;
+    // Only use stored user if we have a valid token
+    const token = localStorage.getItem('access_token');
+    if (!token) return null;
+    return raw ? (JSON.parse(raw) as User) : null;
   });
 
   const value = useMemo<AuthContextValue>(

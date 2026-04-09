@@ -8,7 +8,7 @@ const createEventSchema = z.object({
   description: z.string().optional(),
   startAt: z.string(),
   endAt: z.string(),
-  venueId: z.string().optional(),
+  venueId: z.string().min(1, 'Venue is required'),
   department: z.string().optional(),
   budget: z.number().optional(),
 });

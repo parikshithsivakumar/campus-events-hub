@@ -16,9 +16,15 @@ const schema = z.object({
 
 export const listVenues = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('listVenues called for user:', req.user?.email, 'collegeId:', req.user?.collegeId);
+    
     const venues = await Venue.find({ collegeId: req.user.collegeId, deleted: false });
+    
+    console.log('Found venues:', venues.length, 'for collegeId:', req.user.collegeId);
+    
     res.json(venues);
   } catch (err: any) {
+    console.error('listVenues error:', err);
     res.status(500).json({ error: err.message });
   }
 };

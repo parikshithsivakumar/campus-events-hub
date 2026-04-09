@@ -11,16 +11,7 @@ const registerSchema = z.object({
   password: z.string().min(8),
   role: z.enum(['SUPER_ADMIN', 'COLLEGE_ADMIN', 'FACULTY_ADVISOR', 'STUDENT_ORGANIZER', 'VOLUNTEER', 'DEPARTMENT_APPROVER']).optional(),
   collegeName: z.string().optional(),
-  collegeDomain: z.string().optional(),
-}).refine((data) => {
-  // COLLEGE_ADMIN must provide collegeDomain
-  if (data.role === 'COLLEGE_ADMIN' && !data.collegeDomain) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'College Admin must provide college domain',
-  path: ['collegeDomain'],
+  collegeDomain: z.string().min(1, 'College domain is required'),
 });
 
 export const register = async (req: Request, res: Response) => {
@@ -30,22 +21,12 @@ export const register = async (req: Request, res: Response) => {
     const existing = await User.findOne({ email: payload.email });
     if (existing) return res.status(409).json({ error: 'Email already registered' });
 
-    let college = null;
-    
-    // If collegeDomain is provided, find or create the college
-    if (payload.collegeDomain) {
-      college = await College.findOne({ domain: payload.collegeDomain });
-      if (!college) {
-        const collegeName = payload.collegeName || 
-          payload.collegeDomain.split('.')[0].toUpperCase() + ' College';
-        college = await College.create({ name: collegeName, domain: payload.collegeDomain });
-      }
-    } else {
-      // For non-admin users without a domain, create a default college
-      college = await College.findOne({ domain: 'default.college' });
-      if (!college) {
-        college = await College.create({ name: 'Default College', domain: 'default.college' });
-      }
+    // Find or create the college
+    let college = await College.findOne({ domain: payload.collegeDomain });
+    if (!college) {
+      const collegeName = payload.collegeName || 
+        payload.collegeDomain.split('.')[0].toUpperCase() + ' College';
+      college = await College.create({ name: collegeName, domain: payload.collegeDomain });
     }
 
     const hash = await bcrypt.hash(payload.password, 10);
