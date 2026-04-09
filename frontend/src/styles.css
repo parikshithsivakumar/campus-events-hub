@@ -1268,3 +1268,351 @@ th {
 		font-size: 16px;
 	}
 }
+
+/* ===== MODAL STYLES ===== */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(24, 36, 28, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	padding: 1rem;
+	animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.modal-content {
+	background: white;
+	border-radius: 1.2rem;
+	max-width: 600px;
+	width: 100%;
+	max-height: 85vh;
+	overflow-y: auto;
+	box-shadow: 0 25px 60px rgba(17, 40, 27, 0.2);
+	animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.modal-header {
+	padding: 2rem 2rem 1.5rem;
+	border-bottom: 1px solid #e3ebe6;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.modal-header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	color: var(--ink);
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+
+.modal-close {
+	width: 2.2rem;
+	height: 2.2rem;
+	border: none;
+	background: rgba(31, 122, 93, 0.08);
+	border-radius: 50%;
+	cursor: pointer;
+	font-size: 1.8rem;
+	color: var(--ink);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+}
+
+.modal-close:hover {
+	background: rgba(31, 122, 93, 0.16);
+	transform: rotate(90deg);
+}
+
+.modal-form {
+	padding: 2rem;
+	display: grid;
+	gap: 1.5rem;
+}
+
+.modal-buttons {
+	display: flex;
+	gap: 1rem;
+	margin-top: 1rem;
+	justify-content: flex-end;
+}
+
+.modal-buttons button {
+	min-width: 120px;
+}
+
+/* ===== TEXTAREA INPUT ===== */
+.textarea-input {
+	width: 100%;
+	border-radius: 0.8rem;
+	border: 2px solid #dde6e1;
+	background: #fff;
+	color: #18241c;
+	padding: 0.8rem 1rem;
+	font: inherit;
+	transition: all 0.2s ease;
+	font-size: 0.95rem;
+	font-family: 'Segoe UI', sans-serif;
+	resize: vertical;
+	min-height: 100px;
+}
+
+.textarea-input:hover {
+	border-color: rgba(31, 122, 93, 0.3);
+	background: rgba(31, 122, 93, 0.02);
+}
+
+.textarea-input:focus {
+	outline: none;
+	border-color: var(--brand);
+	background: white;
+	box-shadow: 0 0 0 4px rgba(31, 122, 93, 0.1);
+}
+
+/* ===== INPUT WITH BUTTON ===== */
+.input-with-button {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.input-with-button .input-field {
+	flex: 1;
+	border-radius: 0.8rem;
+	border: 2px solid #dde6e1;
+	background: #fff;
+	color: #18241c;
+	padding: 0.75rem 1rem;
+	font: inherit;
+	transition: all 0.2s ease;
+	font-size: 0.95rem;
+}
+
+.input-with-button .input-field:focus {
+	outline: none;
+	border-color: var(--brand);
+	box-shadow: 0 0 0 3px rgba(31, 122, 93, 0.1);
+}
+
+.btn-small {
+	padding: 0.7rem 1.2rem !important;
+	font-size: 0.9rem !important;
+	white-space: nowrap;
+}
+
+/* ===== TAGS CONTAINER ===== */
+.tags-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin-top: 0.8rem;
+}
+
+.tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.9rem;
+	background: linear-gradient(135deg, rgba(31, 122, 93, 0.1), rgba(31, 122, 93, 0.05));
+	border: 1.5px solid rgba(31, 122, 93, 0.2);
+	border-radius: 0.6rem;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--ink);
+	animation: tagAppear 0.2s ease;
+}
+
+@keyframes tagAppear {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.tag-remove {
+	background: none;
+	border: none;
+	color: var(--danger);
+	cursor: pointer;
+	font-size: 1.1rem;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	line-height: 1;
+}
+
+.tag-remove:hover {
+	color: #8a1a1a;
+	transform: scale(1.2);
+}
+
+/* ===== VENUE SPECIFIC STYLES ===== */
+.venue-capacity {
+	font-size: 0.9rem;
+	color: var(--subtle);
+	font-weight: 500;
+}
+
+.venue-details {
+	display: grid;
+	gap: 0.6rem;
+	margin: 1rem 0;
+	padding: 0.8rem;
+	background: rgba(31, 122, 93, 0.04);
+	border-radius: 0.6rem;
+	border-left: 3px solid rgba(31, 122, 93, 0.3);
+}
+
+.venue-detail-item {
+	font-size: 0.85rem;
+	line-height: 1.4;
+	color: var(--ink);
+}
+
+.venue-detail-item strong {
+	display: inline-block;
+	min-width: 85px;
+	color: var(--brand);
+	font-weight: 600;
+}
+
+.venue-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0.8rem 0;
+}
+
+.tag.facilities-tag {
+	background: linear-gradient(135deg, rgba(31, 122, 93, 0.12), rgba(31, 122, 93, 0.06));
+	border-color: rgba(31, 122, 93, 0.25);
+}
+
+.tag.amenities-tag {
+	background: linear-gradient(135deg, rgba(24, 89, 176, 0.12), rgba(24, 89, 176, 0.06));
+	border-color: rgba(24, 89, 176, 0.25);
+}
+
+/* ===== VENUE ACTION BUTTONS ===== */
+.venue-card header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+gap: 0.75rem;
+}
+
+.venue-card header > div {
+flex: 1;
+}
+
+.venue-card-actions {
+display: flex;
+gap: 0.5rem;
+flex-shrink: 0;
+}
+
+.action-btn {
+width: 2.2rem;
+height: 2.2rem;
+border: 1px solid rgba(31, 122, 93, 0.2);
+background: rgba(255, 255, 255, 0.9);
+border-radius: 0.6rem;
+cursor: pointer;
+font-size: 1rem;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.2s ease;
+padding: 0;
+line-height: 1;
+}
+
+.action-btn:hover {
+transform: scale(1.1);
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.edit-btn:hover {
+background: rgba(31, 122, 93, 0.1);
+border-color: rgba(31, 122, 93, 0.4);
+}
+
+.action-btn.delete-btn:hover {
+background: rgba(162, 37, 37, 0.1);
+border-color: rgba(162, 37, 37, 0.4);
+}
+
+/* ===== DELETE MODAL ===== */
+.modal-content.delete-modal {
+max-width: 420px;
+}
+
+.delete-content {
+padding: 2rem;
+display: grid;
+gap: 1.5rem;
+}
+
+.delete-warning {
+text-align: center;
+padding: 1.5rem;
+background: linear-gradient(135deg, rgba(162, 37, 37, 0.08), rgba(162, 37, 37, 0.04));
+border: 2px solid rgba(162, 37, 37, 0.15);
+border-radius: 0.8rem;
+}
+
+.warning-icon {
+font-size: 2.5rem;
+margin-bottom: 1rem;
+}
+
+.delete-warning p {
+margin: 0.75rem 0;
+line-height: 1.5;
+color: var(--ink);
+}
+
+.delete-warning p strong {
+color: var(--danger);
+font-weight: 700;
+}
+
+.warning-sub {
+font-size: 0.85rem;
+color: var(--subtle);
+font-style: italic;
+}

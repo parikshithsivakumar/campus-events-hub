@@ -12,6 +12,15 @@ const registerSchema = z.object({
   role: z.enum(['SUPER_ADMIN', 'COLLEGE_ADMIN', 'FACULTY_ADVISOR', 'STUDENT_ORGANIZER', 'VOLUNTEER', 'DEPARTMENT_APPROVER']).optional(),
   collegeName: z.string().optional(),
   collegeDomain: z.string().optional(),
+}).refine((data) => {
+  // COLLEGE_ADMIN must provide collegeDomain
+  if (data.role === 'COLLEGE_ADMIN' && !data.collegeDomain) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'College Admin must provide college domain',
+  path: ['collegeDomain'],
 });
 
 export const register = async (req: Request, res: Response) => {
@@ -22,10 +31,20 @@ export const register = async (req: Request, res: Response) => {
     if (existing) return res.status(409).json({ error: 'Email already registered' });
 
     let college = null;
-    if (payload.collegeName && payload.collegeDomain) {
+    
+    // If collegeDomain is provided, find or create the college
+    if (payload.collegeDomain) {
       college = await College.findOne({ domain: payload.collegeDomain });
       if (!college) {
-        college = await College.create({ name: payload.collegeName, domain: payload.collegeDomain });
+        const collegeName = payload.collegeName || 
+          payload.collegeDomain.split('.')[0].toUpperCase() + ' College';
+        college = await College.create({ name: collegeName, domain: payload.collegeDomain });
+      }
+    } else {
+      // For non-admin users without a domain, create a default college
+      college = await College.findOne({ domain: 'default.college' });
+      if (!college) {
+        college = await College.create({ name: 'Default College', domain: 'default.college' });
       }
     }
 
@@ -35,13 +54,13 @@ export const register = async (req: Request, res: Response) => {
       name: payload.name,
       password: hash,
       role: payload.role || 'STUDENT_ORGANIZER',
-      collegeId: college?._id,
+      collegeId: college._id,
     });
 
-    const access = jwt.sign({ sub: user._id, role: user.role }, process.env.JWT_ACCESS_SECRET || 'dev-access-secret', { expiresIn: '24h' });
+    const access = jwt.sign({ sub: user._id, role: user.role, collegeId: user.collegeId }, process.env.JWT_ACCESS_SECRET || 'dev-access-secret', { expiresIn: '24h' });
     const refresh = jwt.sign({ sub: user._id }, process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret', { expiresIn: '30d' });
 
-    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role } });
+    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role, collegeId: user.collegeId } });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
