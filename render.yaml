@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: campus-events-hub-api
+    runtime: node
+    buildCommand: "cd backend && npm install && npm run build"
+    startCommand: "cd backend && npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
