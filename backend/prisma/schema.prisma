@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model College {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+  users     User[]
+  venues    Venue[]
+  events    Event[]
+  teams     Team[]
+  @@index([domain])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  college   College  @relation(fields: [collegeId], references: [id])
+  collegeId String
+  roles     Role[]   @relation("UserRoles")
+  organizedEvents Event[]       @relation("EventOrganizer")
+  approvalsGiven  Approval[]    @relation("ApprovalApprover")
+  volunteerRoles  Volunteer[]
+  assignedTasks   Task[]        @relation("TaskAssignee")
+  notifications   Notification[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+  @@index([collegeId])
+}
+
+model Role {
+  id          String      @id @default(cuid())
+  name        String
+  permissions Permission[] @relation("RolePermissions")
+  users       User[]       @relation("UserRoles")
+}
+
+model Permission {
+  id    String @id @default(cuid())
+  name  String @unique
+  roles Role[] @relation("RolePermissions")
+}
+
+model Venue {
+  id          String   @id @default(cuid())
+  name        String
+  college     College  @relation(fields: [collegeId], references: [id])
+  collegeId   String
+  capacity    Int
+  resources   Resource[]
+  bookings    Booking[]
+  events      Event[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     Boolean  @default(false)
+  @@index([collegeId])
+}
+
+model Resource {
+  id        String  @id @default(cuid())
+  name      String
+  venue     Venue   @relation(fields: [venueId], references: [id])
+  venueId   String
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id           String     @id @default(cuid())
+  title        String
+  description  String
+  startAt      DateTime
+  endAt        DateTime
+  organizer    User       @relation("EventOrganizer", fields: [organizerId], references: [id])
+  organizerId  String
+  college      College    @relation(fields: [collegeId], references: [id])
+  collegeId    String
+  venue        Venue?     @relation(fields: [venueId], references: [id])
+  venueId      String?
+  approvals    Approval[]
+  bookings     Booking[]
+  tasks        Task[]
+  status       String     @default("PENDING")
+  reports      EventReport[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deleted      Boolean    @default(false)
+  @@index([collegeId])
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  approver  User     @relation("ApprovalApprover", fields: [approverId], references: [id])
+  approverId String
+  decision  String
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  venueId   String
+  startAt   DateTime
+  endAt     DateTime
+  status    String   @default("CONFIRMED")
+  createdAt DateTime @default(now())
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  college   College  @relation(fields: [collegeId], references: [id])
+  collegeId String
+  volunteers Volunteer[]
+}
+
+model Volunteer {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  team      Team?    @relation(fields: [teamId], references: [id])
+  teamId    String?
+  skills    String[]
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  description String?
+  assignee  User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId String?
+  event     Event?   @relation(fields: [eventId], references: [id])
+  eventId   String?
+  status    String   @default("OPEN")
+  dueDate   DateTime?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EventReport {
+  id        String   @id @default(cuid())
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  summary   String
+  metrics   Json
+  createdAt DateTime @default(now())
+}
+
+// Soft-delete and scoping must be enforced at application layer via middleware/services
