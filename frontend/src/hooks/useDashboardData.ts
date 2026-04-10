@@ -1,15 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
-import {
-  mockApprovals,
-  mockEvents,
-  mockNotifications,
-  mockReports,
-  mockTasks,
-  mockVenues,
-  mockVolunteers,
-} from '../utils/mockData';
 
 export function useEventsData() {
   return useQuery({
@@ -19,11 +10,6 @@ export function useEventsData() {
         const res = await api.get('/events');
         // Normalize _id to id for consistency
         const events = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        
-        // If no events received from API, use mock data
-        if (!events || events.length === 0) {
-          return mockEvents;
-        }
         
         return events.map((event: any) => {
           // Handle organizerId: if it's an object with _id, extract it
@@ -49,7 +35,7 @@ export function useEventsData() {
         });
       } catch (error) {
         console.error('Error fetching events:', error);
-        return mockEvents;
+        return []; // Return empty array, not mock data
       }
     },
     staleTime: 0,
@@ -74,9 +60,10 @@ export function useVenuesData() {
     queryFn: async () => {
       try {
         const res = await api.get('/venues');
-        return res.data;
-      } catch {
-        return mockVenues;
+        return Array.isArray(res.data) ? res.data : [];
+      } catch (error) {
+        console.error('Failed to fetch venues:', error);
+        return []; // Return empty array, not mock data
       }
     },
     staleTime: 60000,
@@ -90,9 +77,10 @@ export function useVolunteersData() {
     queryFn: async () => {
       try {
         const res = await api.get('/volunteers');
-        return res.data;
-      } catch {
-        return mockVolunteers;
+        return Array.isArray(res.data) ? res.data : [];
+      } catch (error) {
+        console.error('Failed to fetch volunteers:', error);
+        return []; // Return empty array, not mock data
       }
     },
     staleTime: 60000,
@@ -112,7 +100,7 @@ export function useTasksData() {
         return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
-        return mockTasks; // Fallback to mock if network error
+        return []; // Return empty array, not mock data
       }
     },
     staleTime: 0,
