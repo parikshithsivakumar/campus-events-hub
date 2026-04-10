@@ -6,6 +6,7 @@ import { useApprovalsData, useEventsData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import api from '../../services/api';
 
 export default function ApprovalsPage() {
   const { user } = useAuthStore();
@@ -48,20 +49,7 @@ export default function ApprovalsPage() {
     }
     
     try {
-      const token = localStorage.getItem('access_token');
-      
-      const response = await fetch(`http://localhost:4000/api/events/${eventId}/approve`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ decision: 'APPROVED', comment: feedback }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to approve event');
-      }
+      const response = await api.post(`/events/${eventId}/approve`, { decision: 'APPROVED', comment: feedback });
       
       // Invalidate cache to trigger refetch
       await queryClient.invalidateQueries({ queryKey: ['events'] });
@@ -69,7 +57,7 @@ export default function ApprovalsPage() {
       
       // Close modal
       setIsDetailModalOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Approval error:', error);
       throw error;
     }
@@ -88,16 +76,7 @@ export default function ApprovalsPage() {
     }
     
     try {
-      const token = localStorage.getItem('access_token');
-      
-      const response = await fetch(`http://localhost:4000/api/events/${eventId}/approve`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ decision: 'REJECTED', comment: feedback }),
-      });
+      const response = await api.post(`/events/${eventId}/approve`, { decision: 'REJECTED', comment: feedback });
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to reject event');

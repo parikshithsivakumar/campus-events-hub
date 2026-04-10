@@ -2,6 +2,7 @@ import Button from './ui/Button';
 import Card from './ui/Card';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import api from '../services/api';
 
 interface DeleteEventModalProps {
   isOpen: boolean;
@@ -21,23 +22,12 @@ export default function DeleteEventModal({ isOpen, event, onClose, onEventDelete
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:4000/api/events/${event.id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        onEventDeleted();
-        onClose();
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to delete event');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const response = await api.delete(`/events/${event.id}`);
+      onEventDeleted();
+      onClose();
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Failed to delete event';
+      setError(msg);
     } finally {
       setIsDeleting(false);
     }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from './ui/Button';
+import api from '../services/api';
 
 interface EditEventModalProps {
   isOpen: boolean;
@@ -42,25 +43,12 @@ export default function EditEventModal({ isOpen, event, onClose, onEventUpdated 
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:4000/api/events/${event.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        onEventUpdated();
-        onClose();
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to update event');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const response = await api.put(`/events/${event.id}`, formData);
+      onEventUpdated();
+      onClose();
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.message || 'Failed to update event';
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
