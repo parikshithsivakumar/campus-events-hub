@@ -357,24 +357,24 @@ export default function DashboardPage() {
 
   const renderDepartmentApproverDashboard = () => {
     // Calculate real statistics for department approver
-    // Department approvers ONLY review events that Faculty Advisor has APPROVED
+    // Department approvers review ALL APPROVED events (not filtered by department)
     const deptEvents = events.filter((e: any) => 
-      e.department === user?.department && e.status === 'APPROVED'
+      e.status === 'APPROVED'
     );
     const deptReviewComplete = events.filter((e: any) => 
-      e.department === user?.department && (e.status === 'APPROVED' || e.status === 'REJECTED')
+      e.status === 'APPROVED_FINAL' || e.status === 'REJECTED'
     ).length;
-    const deptApproved = events.filter((e: any) => 
-      e.department === user?.department && e.status === 'APPROVED'
+    const deptApprovedFinal = events.filter((e: any) => 
+      e.status === 'APPROVED_FINAL'
     ).length;
     const deptRejected = events.filter((e: any) => 
-      e.department === user?.department && e.status === 'REJECTED'
+      e.status === 'REJECTED'
     ).length;
     const deptTotal = deptEvents.length;
 
     return (
       <div className="grid-layout">
-        <Card title="Approval Workload" subtitle={`${user?.department || 'Department'} submissions (Faculty approved)`}>
+        <Card title="Approval Workload" subtitle="Faculty-approved events pending your review">
           <div className="stat-row">
             <div>
               <strong>{deptTotal}</strong>
@@ -385,8 +385,8 @@ export default function DashboardPage() {
               <span>You Rejected</span>
             </div>
             <div>
-              <strong>{deptReviewComplete}</strong>
-              <span>You Reviewed</span>
+              <strong>{deptApprovedFinal}</strong>
+              <span>You Approved</span>
             </div>
           </div>
         </Card>
@@ -415,9 +415,9 @@ export default function DashboardPage() {
             <div className="bar-row">
               <span>Completion Rate</span>
               <div>
-                <i style={{ width: `${deptTotal > 0 ? (deptReviewComplete / deptTotal) * 100 : 0}%` }} />
+                <i style={{ width: `${deptTotal > 0 ? ((deptApprovedFinal + deptRejected) / deptTotal) * 100 : 0}%` }} />
               </div>
-              <strong>{deptTotal > 0 ? ((deptReviewComplete / deptTotal) * 100).toFixed(0) : 0}%</strong>
+              <strong>{deptTotal > 0 ? (((deptApprovedFinal + deptRejected) / deptTotal) * 100).toFixed(0) : 0}%</strong>
             </div>
             <div className="bar-row">
               <span>Rejection Rate</span>
