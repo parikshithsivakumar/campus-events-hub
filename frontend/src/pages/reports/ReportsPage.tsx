@@ -18,6 +18,12 @@ export default function ReportsPage() {
     // Department approvers only see reports for their department's events
     const deptEventIds = new Set(events.filter((e: any) => e.department === user.department).map((e: any) => e.id));
     filteredReports = reports.filter((report: any) => deptEventIds.has(report.eventId || report.id));
+  } else if (user?.role === 'FACULTY_ADVISOR') {
+    // Faculty advisors see all college reports (no additional filtering)
+    filteredReports = reports;
+  } else if (user?.role === 'COLLEGE_ADMIN' || user?.role === 'SUPER_ADMIN') {
+    // Admins see all college reports
+    filteredReports = reports;
   }
 
   return (

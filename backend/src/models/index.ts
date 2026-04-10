@@ -49,7 +49,7 @@ const eventSchema = new mongoose.Schema(
     collegeId: { type: mongoose.Schema.Types.ObjectId, ref: 'College', required: true },
     venueId: { type: mongoose.Schema.Types.ObjectId, ref: 'Venue' },
     department: { type: String },
-    status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED', 'IN_REVIEW'], default: 'PENDING' },
+    status: { type: String, enum: ['PENDING', 'APPROVED', 'APPROVED_FINAL', 'REJECTED', 'IN_REVIEW'], default: 'PENDING' },
     budget: { type: Number, default: 0 },
     deleted: { type: Boolean, default: false },
   },

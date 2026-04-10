@@ -47,7 +47,7 @@ export const mockEvents: EventItem[] = [
     department: 'Computer Science',
     organizer: 'Aarav Sharma',
     organizerId: 'u-01',
-    status: 'IN_REVIEW',
+    status: 'APPROVED',
     budget: 175000,
   },
   {
@@ -60,7 +60,7 @@ export const mockEvents: EventItem[] = [
     department: 'Arts Council',
     organizer: 'Priya Desai',
     organizerId: 'u-02',
-    status: 'APPROVED',
+    status: 'APPROVED_FINAL',
     budget: 120000,
   },
   {

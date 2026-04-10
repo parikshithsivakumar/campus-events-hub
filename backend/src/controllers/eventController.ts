@@ -52,7 +52,7 @@ export const approveEvent = async (req: AuthRequest, res: Response) => {
     }
 
     const { id } = req.params;
-    const { decision, comment, stage } = req.body;
+    const { decision, comment } = req.body;
 
     // Validate event ID
     if (!id) {
@@ -65,23 +65,45 @@ export const approveEvent = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Event not found' });
     }
 
+    // Sequential approval workflow based on role
+    if (req.user.role === 'FACULTY_ADVISOR') {
+      // Faculty Advisor can only approve PENDING events
+      if (event.status !== 'PENDING' && event.status !== 'IN_REVIEW') {
+        return res.status(400).json({ 
+          error: 'Faculty Advisor can only approve PENDING events' 
+        });
+      }
+      
+      // If Faculty Advisor rejects → Event is REJECTED (final)
+      // If Faculty Advisor approves → Event goes to APPROVED (awaits Department Approver)
+      const newStatus = decision === 'REJECTED' ? 'REJECTED' : 'APPROVED';
+      await Event.findByIdAndUpdate(id, { status: newStatus });
+      
+    } else if (req.user.role === 'DEPARTMENT_APPROVER') {
+      // Department Approver can only review APPROVED events (only Faculty-approved events)
+      if (event.status !== 'APPROVED') {
+        return res.status(400).json({ 
+          error: 'Department Approver can only review Faculty-approved events' 
+        });
+      }
+      
+      // If Department Approver rejects → Event is REJECTED (final)
+      // If Department Approver approves → Event goes to APPROVED_FINAL (both stages complete)
+      if (decision === 'REJECTED') {
+        await Event.findByIdAndUpdate(id, { status: 'REJECTED' });
+      } else if (decision === 'APPROVED') {
+        await Event.findByIdAndUpdate(id, { status: 'APPROVED_FINAL' });
+      }
+    }
+
+    // Create approval record
     const approval = await Approval.create({
       eventId: id,
       approverId: req.user._id,
       decision: decision || 'PENDING',
       comment,
-      stage: stage || 'GENERAL',
+      stage: req.user.role === 'FACULTY_ADVISOR' ? 'FACULTY' : 'DEPARTMENT',
     });
-
-    if (decision === 'APPROVED') {
-      const allApprovals = await Approval.find({ eventId: id });
-      const anyRejected = allApprovals.some(a => a.decision === 'REJECTED');
-      if (!anyRejected) {
-        await Event.findByIdAndUpdate(id, { status: 'APPROVED' });
-      }
-    } else if (decision === 'REJECTED') {
-      await Event.findByIdAndUpdate(id, { status: 'REJECTED' });
-    }
 
     res.json(approval);
   } catch (err: any) {

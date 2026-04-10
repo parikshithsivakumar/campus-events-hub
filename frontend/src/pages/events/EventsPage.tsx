@@ -177,7 +177,16 @@ export default function EventsPage() {
         </Card>
       )}
 
-      <Card title="Active Events" subtitle="Latest proposals and approved events">
+      <Card 
+        title="Active Events" 
+        subtitle={
+          isStudentOrganizer 
+            ? "Your event proposals and approved events"
+            : user?.role === 'DEPARTMENT_APPROVER'
+              ? "All finalized events ready for execution"
+              : "Latest proposals and approved events"
+        }
+      >
         <div className="table-wrap">
           <table>
             <thead>
@@ -195,8 +204,14 @@ export default function EventsPage() {
                 .filter((event: any) => {
                   // Student organizers see only their events
                   if (isStudentOrganizer) return event.organizerId === user?.id;
-                  // Department approvers see only their department's events
-                  if (user?.role === 'DEPARTMENT_APPROVER') return event.department === user?.department;
+                  // Department approvers see APPROVED_FINAL events from all departments (finalized approvals)
+                  if (user?.role === 'DEPARTMENT_APPROVER') {
+                    return event.status === 'APPROVED_FINAL';
+                  }
+                  // College admins and super admins see approved/final events
+                  if (user?.role === 'COLLEGE_ADMIN' || user?.role === 'SUPER_ADMIN') {
+                    return event.status === 'APPROVED_FINAL' || event.status === 'APPROVED';
+                  }
                   // Others see all events (filtered by college by default from backend)
                   return true;
                 })
@@ -277,6 +292,26 @@ export default function EventsPage() {
                 ))}
             </tbody>
           </table>
+          {events.filter((event: any) => {
+            if (isStudentOrganizer) return event.organizerId === user?.id;
+            if (user?.role === 'DEPARTMENT_APPROVER') {
+              return event.status === 'APPROVED_FINAL';
+            }
+            if (user?.role === 'COLLEGE_ADMIN' || user?.role === 'SUPER_ADMIN') {
+              return event.status === 'APPROVED_FINAL' || event.status === 'APPROVED';
+            }
+            return true;
+          }).length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+              <p>
+                {user?.role === 'DEPARTMENT_APPROVER'
+                  ? 'No approved events yet. Finalize events in the Approvals section.'
+                  : isStudentOrganizer
+                  ? 'No events created yet. Start by creating a new event proposal.'
+                  : 'No approved events to display.'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Modals */}

@@ -21,6 +21,8 @@ export default function TasksPage() {
   });
 
   const isStudentOrganizer = user?.role === 'STUDENT_ORGANIZER';
+  const isFacultyAdvisor = user?.role === 'FACULTY_ADVISOR';
+  const canModifyTasks = isStudentOrganizer; // Only student organizers can modify
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +35,8 @@ export default function TasksPage() {
 
   return (
     <div className="grid-layout">
-      <Card title="Task Kanban" subtitle="Volunteer and team execution board">
-        {isStudentOrganizer && (
+      <Card title="Task Kanban" subtitle={isFacultyAdvisor ? "View team task progress" : "Volunteer and team execution board"}>
+        {canModifyTasks && (
           <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #e0e0e0' }}>
             {!showAddForm ? (
               <Button onClick={() => setShowAddForm(true)}>+ Add Task</Button>

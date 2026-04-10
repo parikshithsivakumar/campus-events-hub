@@ -18,6 +18,12 @@ export function useEventsData() {
         const res = await api.get('/events');
         // Normalize _id to id for consistency
         const events = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        
+        // If no events received from API, use mock data
+        if (!events || events.length === 0) {
+          return mockEvents;
+        }
+        
         return events.map((event: any) => {
           // Handle organizerId: if it's an object with _id, extract it
           let organizerId = event.organizerId;

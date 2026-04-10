@@ -11,6 +11,7 @@ interface ApprovalDetailModalProps {
   onApproveWithData: (feedback: string) => Promise<void>;
   onRejectWithData: (feedback: string) => Promise<void>;
   canApprove?: boolean;
+  userRole?: string;
 }
 
 export default function ApprovalDetailModal({ 
@@ -20,7 +21,8 @@ export default function ApprovalDetailModal({
   onClose, 
   onApproveWithData,
   onRejectWithData,
-  canApprove = true
+  canApprove = true,
+  userRole = ''
 }: ApprovalDetailModalProps) {
   const [feedback, setFeedback] = useState(approval?.comment || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,12 +105,29 @@ export default function ApprovalDetailModal({
             </div>
           )}
 
-          {/* Event Header */}
+          {/* Event Header with Approval Status */}
           <div>
             <h3 style={{ marginBottom: '0.5rem' }}>{event.title}</h3>
-            <Badge variant={event.status === 'PENDING' ? 'warning' : event.status === 'APPROVED' ? 'success' : 'danger'}>
-              {event.status}
-            </Badge>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {/* Faculty Advisor Status */}
+              <Badge variant="success">
+                ✓ Faculty Advisor: Approved
+              </Badge>
+              
+              {/* Department Approval Status - shown only to Department Approver */}
+              {userRole === 'DEPARTMENT_APPROVER' && (
+                <Badge variant={event.status === 'APPROVED_FINAL' ? 'success' : 'warning'}>
+                  {event.status === 'APPROVED_FINAL' ? '✓ Dept Approval: Complete' : '🔄 Dept Approval: Pending'}
+                </Badge>
+              )}
+              
+              {/* Original Status - shown to others */}
+              {userRole !== 'DEPARTMENT_APPROVER' && (
+                <Badge variant={event.status === 'PENDING' ? 'warning' : event.status === 'APPROVED' || event.status === 'APPROVED_FINAL' ? 'success' : 'danger'}>
+                  {event.status}
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Event Details Grid */}

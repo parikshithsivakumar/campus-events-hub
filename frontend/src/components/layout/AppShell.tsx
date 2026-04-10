@@ -14,7 +14,7 @@ const allLinks = [
 const roleNavigation: Record<string, string[]> = {
   SUPER_ADMIN: ['Dashboard', 'Events', 'Approvals', 'Venues', 'Tasks', 'Reports'],
   COLLEGE_ADMIN: ['Dashboard', 'Events', 'Approvals', 'Venues', 'Tasks', 'Reports'],
-  FACULTY_ADVISOR: ['Dashboard', 'Approvals', 'Events', 'Reports'],
+  FACULTY_ADVISOR: ['Dashboard', 'Approvals', 'Events', 'Tasks', 'Reports'],
   STUDENT_ORGANIZER: ['Dashboard', 'Events', 'Proposed Events', 'Tasks', 'Reports'],
   VOLUNTEER: ['Dashboard', 'Tasks', 'Events'],
   DEPARTMENT_APPROVER: ['Dashboard', 'Events', 'Approvals', 'Reports'],

@@ -153,59 +153,85 @@ export default function DashboardPage() {
     </div>
   );
 
-  const renderFacultyAdvisorDashboard = () => (
-    <div className="grid-layout">
-      <Card title="My Approvals Queue" subtitle="Events awaiting your review">
-        <div className="stat-row">
-          <div>
-            <strong>{pending}</strong>
-            <span>Pending Review</span>
-          </div>
-          <div>
-            <strong>{approved}</strong>
-            <span>Approved This Month</span>
-          </div>
-          <div>
-            <strong>6</strong>
-            <span>Rejected</span>
-          </div>
-          <div>
-            <strong>18</strong>
-            <span>Total Reviewed</span>
-          </div>
-        </div>
-      </Card>
-
-      <Card title="Events Needing Approval" subtitle="Action required">
-        <ul className="list-compact">
-          {events
-            .filter((e: { status: string }) => e.status === 'PENDING' || e.status === 'IN_REVIEW')
-            .slice(0, 8)
-            .map((event: { id: string; title: string; status: string; department: string }) => (
-              <li key={event.id}>
-                <div>
-                  <strong>{event.title}</strong>
-                  <p>{event.department}</p>
-                </div>
-                <Badge variant="warning">{event.status}</Badge>
-              </li>
-            ))}
-        </ul>
-      </Card>
-
-      <Card title="My Profile" subtitle="Advisor information">
-        <ul className="list-compact">
-          <li>
+  const renderFacultyAdvisorDashboard = () => {
+    // Faculty advisors see all college  events (show PENDING and IN_REVIEW as awaiting approval)
+    const advisorEvents = events;
+    const advisorPending = advisorEvents.filter((e: any) => e.status === 'PENDING' || e.status === 'IN_REVIEW').length;
+    const advisorApproved = advisorEvents.filter((e: any) => e.status === 'APPROVED').length;
+    const advisorRejected = advisorEvents.filter((e: any) => e.status === 'REJECTED').length;
+    const advisorTotal = advisorEvents.length;
+    
+    return (
+      <div className="grid-layout">
+        <Card title="My Approvals Queue" subtitle="Events awaiting your review">
+          <div className="stat-row">
             <div>
-              <strong>{user?.name || 'Faculty Advisor'}</strong>
-              <p>{user?.email || 'advisor@college.edu'}</p>
+              <strong>{advisorPending}</strong>
+              <span>Pending Review</span>
             </div>
-            <Badge variant="neutral">Active</Badge>
-          </li>
-        </ul>
-      </Card>
-    </div>
-  );
+            <div>
+              <strong>{advisorApproved}</strong>
+              <span>Approved</span>
+            </div>
+            <div>
+              <strong>{advisorRejected}</strong>
+              <span>Rejected</span>
+            </div>
+            <div>
+              <strong>{advisorTotal}</strong>
+              <span>Total Events</span>
+            </div>
+          </div>
+        </Card>
+
+        <Card title="Events Needing Approval" subtitle="Action required">
+          <ul className="list-compact">
+            {advisorEvents
+              .filter((e: { status: string }) => e.status === 'PENDING' || e.status === 'IN_REVIEW')
+              .slice(0, 8)
+              .map((event: { id: string; title: string; status: string; department: string }) => (
+                <li key={event.id}>
+                  <div>
+                    <strong>{event.title}</strong>
+                    <p>{event.department}</p>
+                  </div>
+                  <Badge variant="warning">{event.status}</Badge>
+                </li>
+              ))}
+          </ul>
+        </Card>
+
+        <Card title="My Approved Events" subtitle="Events you've approved">
+          <ul className="list-compact">
+            {advisorEvents
+              .filter((e: { status: string }) => e.status === 'APPROVED')
+              .slice(0, 8)
+              .map((event: { id: string; title: string; status: string; department: string }) => (
+                <li key={event.id}>
+                  <div>
+                    <strong>{event.title}</strong>
+                    <p>{event.department}</p>
+                  </div>
+                  <Badge variant="success">{event.status}</Badge>
+                </li>
+              ))}
+          </ul>
+        </Card>
+
+        <Card title="My Profile" subtitle="Advisor information">
+          <ul className="list-compact">
+            <li>
+              <div>
+                <strong>{user?.name || 'Faculty Advisor'}</strong>
+                <p>{user?.email || 'advisor@college.edu'}</p>
+              </div>
+              <Badge variant="neutral">Active</Badge>
+            </li>
+          </ul>
+        </Card>
+      </div>
+    );
+  };
 
   const renderStudentOrganizerDashboard = () => {
     // Filter events to only show those organized by current user
@@ -331,39 +357,43 @@ export default function DashboardPage() {
 
   const renderDepartmentApproverDashboard = () => {
     // Calculate real statistics for department approver
-    const deptEvents = events.filter((e: any) => e.department === user?.department);
-    const deptPending = deptEvents.filter((e: any) => e.status === 'PENDING' || e.status === 'IN_REVIEW').length;
-    const deptApproved = deptEvents.filter((e: any) => e.status === 'APPROVED').length;
-    const deptRejected = deptEvents.filter((e: any) => e.status === 'REJECTED').length;
+    // Department approvers ONLY review events that Faculty Advisor has APPROVED
+    const deptEvents = events.filter((e: any) => 
+      e.department === user?.department && e.status === 'APPROVED'
+    );
+    const deptReviewComplete = events.filter((e: any) => 
+      e.department === user?.department && (e.status === 'APPROVED' || e.status === 'REJECTED')
+    ).length;
+    const deptApproved = events.filter((e: any) => 
+      e.department === user?.department && e.status === 'APPROVED'
+    ).length;
+    const deptRejected = events.filter((e: any) => 
+      e.department === user?.department && e.status === 'REJECTED'
+    ).length;
     const deptTotal = deptEvents.length;
 
     return (
       <div className="grid-layout">
-        <Card title="Approval Workload" subtitle={`${user?.department || 'Department'} submissions`}>
+        <Card title="Approval Workload" subtitle={`${user?.department || 'Department'} submissions (Faculty approved)`}>
           <div className="stat-row">
             <div>
-              <strong>{deptPending}</strong>
-              <span>Pending</span>
-            </div>
-            <div>
-              <strong>{deptApproved}</strong>
-              <span>Approved</span>
+              <strong>{deptTotal}</strong>
+              <span>Awaiting Your Review</span>
             </div>
             <div>
               <strong>{deptRejected}</strong>
-              <span>Rejected</span>
+              <span>You Rejected</span>
             </div>
             <div>
-              <strong>{deptTotal}</strong>
-              <span>Total</span>
+              <strong>{deptReviewComplete}</strong>
+              <span>You Reviewed</span>
             </div>
           </div>
         </Card>
 
-        <Card title="Events Awaiting Review" subtitle="Action required">
+        <Card title="Events Awaiting Your Approval" subtitle="Only Faculty-approved events shown">
           <ul className="list-compact">
-            {events
-              .filter((e: any) => (e.status === 'PENDING' || e.status === 'IN_REVIEW') && e.department === user?.department)
+            {deptEvents
               .slice(0, 8)
               .map((event: any) => (
                 <li key={event.id}>
@@ -371,30 +401,23 @@ export default function DashboardPage() {
                     <strong>{event.title}</strong>
                     <p>🏫 {event.department} • Budget: INR {event.budget?.toLocaleString?.() ?? '0'}</p>
                   </div>
-                  <Badge variant="warning">{event.status}</Badge>
+                  <Badge variant="warning">Faculty Approved</Badge>
                 </li>
               ))}
           </ul>
-          {deptPending === 0 && (
-            <p style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>No pending approvals for your department</p>
+          {deptTotal === 0 && (
+            <p style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>No Faculty-approved events awaiting your review</p>
           )}
         </Card>
 
         <Card title="Department Analytics" subtitle="Your approval metrics">
           <div className="chart-wrap">
             <div className="bar-row">
-              <span>Pending Rate</span>
+              <span>Completion Rate</span>
               <div>
-                <i style={{ width: `${deptTotal > 0 ? (deptPending / deptTotal) * 100 : 0}%` }} />
+                <i style={{ width: `${deptTotal > 0 ? (deptReviewComplete / deptTotal) * 100 : 0}%` }} />
               </div>
-              <strong>{deptTotal > 0 ? ((deptPending / deptTotal) * 100).toFixed(0) : 0}%</strong>
-            </div>
-            <div className="bar-row">
-              <span>Approval Rate</span>
-              <div>
-                <i style={{ width: `${deptTotal > 0 ? (deptApproved / deptTotal) * 100 : 0}%` }} />
-              </div>
-              <strong>{deptTotal > 0 ? ((deptApproved / deptTotal) * 100).toFixed(0) : 0}%</strong>
+              <strong>{deptTotal > 0 ? ((deptReviewComplete / deptTotal) * 100).toFixed(0) : 0}%</strong>
             </div>
             <div className="bar-row">
               <span>Rejection Rate</span>
