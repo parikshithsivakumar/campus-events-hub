@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
-import { useTasksData } from '../../hooks/useDashboardData';
+import { useTasksData, useVolunteersData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 
 const columns: Array<'TODO' | 'IN_PROGRESS' | 'DONE'> = ['TODO', 'IN_PROGRESS', 'DONE'];
@@ -11,7 +11,8 @@ const priorities: Array<'Low' | 'Medium' | 'High'> = ['Low', 'Medium', 'High'];
 
 export default function TasksPage() {
   const { user } = useAuthStore();
-  const { grouped, updateStatus, addTask } = useTasksData();
+  const { grouped, updateStatus, addTask, tasks } = useTasksData();
+  const { data: volunteers = [] } = useVolunteersData();
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -22,7 +23,14 @@ export default function TasksPage() {
 
   const isStudentOrganizer = user?.role === 'STUDENT_ORGANIZER';
   const isFacultyAdvisor = user?.role === 'FACULTY_ADVISOR';
-  const canModifyTasks = isStudentOrganizer; // Only student organizers can modify
+  const isVolunteer = user?.role === 'VOLUNTEER';
+  const canCreateTasks = isStudentOrganizer;
+
+  // Both SO and Volunteers see all tasks - just different permissions
+  const displayGrouped = grouped;
+  const canUpdateStatus = isStudentOrganizer || isVolunteer;
+
+  console.log(`📋 TasksPage - Role: ${user?.role}, canUpdateStatus: ${canUpdateStatus}, taskCount: ${displayGrouped?.TODO?.length || 0 + displayGrouped?.IN_PROGRESS?.length || 0 + displayGrouped?.DONE?.length || 0}`);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +41,15 @@ export default function TasksPage() {
     }
   };
 
+  const getVolunteerName = (volunteerId: string) => {
+    const volunteer = volunteers.find(v => v.id === volunteerId);
+    return volunteer?.name || volunteerId;
+  };
+
   return (
     <div className="grid-layout">
       <Card title="Task Kanban" subtitle={isFacultyAdvisor ? "View team task progress" : "Volunteer and team execution board"}>
-        {canModifyTasks && (
+        {canCreateTasks && (
           <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #e0e0e0' }}>
             {!showAddForm ? (
               <Button onClick={() => setShowAddForm(true)}>+ Add Task</Button>
@@ -70,14 +83,19 @@ export default function TasksPage() {
                     ))}
                   </select>
                 </div>
-                <input
-                  type="text"
+                <select
                   className="input"
-                  placeholder="Assign to"
                   value={formData.assignee}
                   onChange={e => setFormData({ ...formData, assignee: e.target.value })}
                   required
-                />
+                >
+                  <option value="">Select volunteer to assign</option>
+                  {volunteers.map(volunteer => (
+                    <option key={volunteer.id} value={volunteer.id}>
+                      {volunteer.name}
+                    </option>
+                  ))}
+                </select>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <Button type="submit">Create Task</Button>
                   <Button variant="secondary" onClick={() => setShowAddForm(false)}>Cancel</Button>
@@ -91,13 +109,13 @@ export default function TasksPage() {
             <section key={column} className="kanban-col">
               <header>
                 <h4>{column.replace('_', ' ')}</h4>
-                <span>{grouped[column].length}</span>
+                <span>{displayGrouped[column]?.length || 0}</span>
               </header>
               <div className="kanban-list">
-                {grouped[column].map(task => (
+                {displayGrouped[column]?.map(task => (
                   <article key={task.id} className="kanban-item">
                     <strong>{task.title}</strong>
-                    <p>{task.team} • {task.assignee}</p>
+                    <p>{task.team} • {getVolunteerName(task.assignee || task.assigneeId)}</p>
                     <div className="kanban-meta">
                       <Badge
                         variant={
@@ -110,11 +128,15 @@ export default function TasksPage() {
                       >
                         {task.priority}
                       </Badge>
-                      {isStudentOrganizer && (
+                      {canUpdateStatus && (
                         <select
                           className="input"
                           value={task.status}
-                          onChange={event => updateStatus(task.id, event.target.value as 'TODO' | 'IN_PROGRESS' | 'DONE')}
+                          onChange={event => {
+                            const taskId = task.id || task._id;
+                            console.log(`📝 Updating task: ${taskId} to ${event.target.value}`);
+                            updateStatus(taskId, event.target.value as 'TODO' | 'IN_PROGRESS' | 'DONE');
+                          }}
                         >
                           {columns.map(option => (
                             <option key={option} value={option}>

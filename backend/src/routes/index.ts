@@ -7,6 +7,7 @@ import venueRoutes from './venues';
 import bookingRoutes from './bookings';
 import reportRoutes from './reports';
 import taskRoutes from './tasks';
+import volunteerRoutes from './volunteers';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/venues', venueRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/reports', reportRoutes);
 router.use('/tasks', taskRoutes);
+router.use('/volunteers', volunteerRoutes);
 
 export default router;

@@ -8,6 +8,7 @@ import {
   mockReports,
   mockTasks,
   mockVenues,
+  mockVolunteers,
 } from '../utils/mockData';
 
 export function useEventsData() {
@@ -83,6 +84,22 @@ export function useVenuesData() {
   });
 }
 
+export function useVolunteersData() {
+  return useQuery({
+    queryKey: ['volunteers'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/volunteers');
+        return res.data;
+      } catch {
+        return mockVolunteers;
+      }
+    },
+    staleTime: 60000,
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useTasksData() {
   const queryClient = useQueryClient();
   
@@ -135,11 +152,13 @@ export function useTasksData() {
       if (response.ok) {
         // Invalidate cache to refetch
         await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+        console.log(`✅ Task ${id} updated to ${status}`);
       } else {
-        console.error('Failed to update task status');
+        const errorData = await response.json();
+        console.error(`❌ Failed to update task: ${response.status}`, errorData);
       }
     } catch (error) {
-      console.error('Failed to update task status:', error);
+      console.error('❌ Failed to update task status:', error);
     }
   };
 
@@ -166,7 +185,7 @@ export function useTasksData() {
     }
   };
 
-  return { grouped, updateStatus, addTask };
+  return { grouped, updateStatus, addTask, tasks };
 }
 
 export function useReportsData() {

@@ -36,6 +36,31 @@ export const mockDepartmentApprover: User = {
   department: 'Computer Science',
 };
 
+// Mock volunteer users for task assignment
+export const mockVolunteers: User[] = [
+  {
+    id: 'v-01',
+    name: 'Priya Desai',
+    email: 'priya@demo.edu',
+    role: 'VOLUNTEER',
+    collegeId: 'c-demo',
+  },
+  {
+    id: 'v-02',
+    name: 'Karan Singh',
+    email: 'karan@demo.edu',
+    role: 'VOLUNTEER',
+    collegeId: 'c-demo',
+  },
+  {
+    id: 'v-03',
+    name: 'Neha Gupta',
+    email: 'neha@demo.edu',
+    role: 'VOLUNTEER',
+    collegeId: 'c-demo',
+  },
+];
+
 export const mockEvents: EventItem[] = [
   {
     id: '507f1f77bcf86cd799439011',

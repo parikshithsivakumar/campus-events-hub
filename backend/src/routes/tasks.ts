@@ -5,9 +5,9 @@ import { permit } from '../middlewares/rbac';
 
 const router = Router();
 
-router.get('/', authenticate, permit(['STUDENT_ORGANIZER', 'FACULTY_ADVISOR']), listTasks);
+router.get('/', authenticate, permit(['STUDENT_ORGANIZER', 'FACULTY_ADVISOR', 'VOLUNTEER']), listTasks);
 router.post('/', authenticate, permit(['STUDENT_ORGANIZER']), createTask);
-router.patch('/:id/status', authenticate, permit(['STUDENT_ORGANIZER']), updateTaskStatus);
+router.patch('/:id/status', authenticate, permit(['STUDENT_ORGANIZER', 'VOLUNTEER']), updateTaskStatus);
 router.delete('/:id', authenticate, permit(['STUDENT_ORGANIZER']), deleteTask);
 
 export default router;

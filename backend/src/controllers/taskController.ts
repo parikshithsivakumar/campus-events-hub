@@ -13,8 +13,7 @@ const createTaskSchema = z.object({
 
 export const listTasks = async (req: AuthRequest, res: Response) => {
   try {
-    // Faculty advisors can view, but only student organizers own tasks
-    // So return all tasks from any student organizer (they can all see each other's tasks)
+    // All authenticated users (SO, VOLUNTEER, FACULTY_ADVISOR) see all tasks
     const tasks = await Task.find({ deleted: false });
     res.json(tasks);
   } catch (err: any) {
@@ -44,24 +43,33 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
 export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
   try {
-    // Only student organizers can update task status
-    if (req.user.role !== 'STUDENT_ORGANIZER') {
-      return res.status(403).json({ error: 'Only student organizers can update tasks' });
-    }
-
     const { id } = req.params;
     const { status } = req.body;
 
     const task = await Task.findById(id);
     if (!task) return res.status(404).json({ error: 'Task not found' });
 
-    // Verify ownership
-    if (task.organizerId?.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Only task creator can update this task' });
+    // Permission checks based on role
+    if (req.user.role === 'STUDENT_ORGANIZER') {
+      // Student organizers can update any task (they manage the team)
+      const updatedTask = await Task.findByIdAndUpdate(id, { status }, { new: true });
+      return res.json(updatedTask);
+    } else if (req.user.role === 'VOLUNTEER') {
+      // Volunteers can update only tasks assigned to them
+      // Check if assignee matches user ID (comparing as strings for flexibility)
+      const assigneeStr = task.assignee?.toString() || '';
+      const userIdStr = req.user._id?.toString() || '';
+      
+      console.log(`🔍 Volunteer update check - Task assignee: "${assigneeStr}", User ID: "${userIdStr}"`);
+      
+      if (assigneeStr !== userIdStr) {
+        return res.status(403).json({ error: `You can only update tasks assigned to you. Task assignee: ${assigneeStr}, Your ID: ${userIdStr}` });
+      }
+      const updatedTask = await Task.findByIdAndUpdate(id, { status }, { new: true });
+      return res.json(updatedTask);
+    } else {
+      return res.status(403).json({ error: 'Only student organizers or assigned volunteers can update tasks' });
     }
-
-    const updatedTask = await Task.findByIdAndUpdate(id, { status }, { new: true });
-    res.json(updatedTask);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

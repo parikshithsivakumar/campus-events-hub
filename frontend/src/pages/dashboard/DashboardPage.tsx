@@ -1,6 +1,6 @@
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import { useApprovalsData, useEventsData, useNotificationsData, useReportsData } from '../../hooks/useDashboardData';
+import { useApprovalsData, useEventsData, useNotificationsData, useReportsData, useTasksData, useVolunteersData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 
 export default function DashboardPage() {
@@ -9,6 +9,8 @@ export default function DashboardPage() {
   const { data: approvals = [] } = useApprovalsData();
   const { data: reports = [] } = useReportsData();
   const { data: notifications = [] } = useNotificationsData();
+  const { tasks = [] } = useTasksData();
+  const { data: volunteers = [] } = useVolunteersData();
 
   const pending = approvals.filter((item: { decision: string }) => item.decision === 'PENDING').length;
   const approved = events.filter((item: { status: string }) => item.status === 'APPROVED').length;
@@ -303,57 +305,71 @@ export default function DashboardPage() {
     );
   };
 
-  const renderVolunteerDashboard = () => (
-    <div className="grid-layout">
-      <Card title="My Assignments" subtitle="Tasks and events for you">
-        <div className="stat-row">
-          <div>
-            <strong>8</strong>
-            <span>Active Tasks</span>
-          </div>
-          <div>
-            <strong>12</strong>
-            <span>Completed Tasks</span>
-          </div>
-          <div>
-            <strong>5</strong>
-            <span>Upcoming Events</span>
-          </div>
-          <div>
-            <strong>95%</strong>
-            <span>Completion Rate</span>
-          </div>
-        </div>
-      </Card>
+  const renderVolunteerDashboard = () => {
+    // Get tasks assigned to this volunteer
+    const myTasks = tasks.filter(t => t.assignee === user?.id || t.assigneeId === user?.id);
+    const activeTasks = myTasks.filter(t => t.status !== 'DONE').length;
+    const completedTasks = myTasks.filter(t => t.status === 'DONE').length;
+    const totalTasks = myTasks.length;
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(0) : '0';
 
-      <Card title="Upcoming Events" subtitle="Where you'll be volunteering">
-        <ul className="list-compact">
-          {events.slice(0, 5).map((event: { id: string; title: string; status: string; department: string }) => (
-            <li key={event.id}>
-              <div>
-                <strong>{event.title}</strong>
-                <p>{event.department}</p>
-              </div>
-              <Badge variant="success">View Details</Badge>
-            </li>
-          ))}
-        </ul>
-      </Card>
+    return (
+      <div className="grid-layout">
+        <Card title="My Assignments" subtitle="Tasks and events for you">
+          <div className="stat-row">
+            <div>
+              <strong>{activeTasks}</strong>
+              <span>Active Tasks</span>
+            </div>
+            <div>
+              <strong>{completedTasks}</strong>
+              <span>Completed Tasks</span>
+            </div>
+            <div>
+              <strong>{totalTasks}</strong>
+              <span>Total Tasks</span>
+            </div>
+            <div>
+              <strong>{completionRate}%</strong>
+              <span>Completion Rate</span>
+            </div>
+          </div>
+        </Card>
 
-      <Card title="Latest Updates" subtitle="What's happening">
-        <ul className="list-compact">
-          {notifications.slice(0, 4).map((item: { id: string; title: string; message: string }) => (
-            <li key={item.id}>
-              <div>
-                <strong>{item.title}</strong>
-                <p>{item.message}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </Card>
-    </div>
-  );
+        <Card title="My Tasks" subtitle="Your assigned work">
+          <ul className="list-compact">
+            {myTasks.slice(0, 8).map((task: any) => (
+              <li key={task.id}>
+                <div>
+                  <strong>{task.title}</strong>
+                  <p>{task.team}</p>
+                </div>
+                <Badge variant={task.status === 'DONE' ? 'success' : task.status === 'IN_PROGRESS' ? 'warning' : 'info'}>
+                  {task.status.replace('_', ' ')}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+          {totalTasks === 0 && (
+            <p style={{ textAlign: 'center', color: '#999', padding: '1rem' }}>No tasks assigned yet</p>
+          )}
+        </Card>
+
+        <Card title="Latest Updates" subtitle="What's happening">
+          <ul className="list-compact">
+            {notifications.slice(0, 4).map((item: { id: string; title: string; message: string }) => (
+              <li key={item.id}>
+                <div>
+                  <strong>{item.title}</strong>
+                  <p>{item.message}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      </div>
+    );
+  };
 
   const renderDepartmentApproverDashboard = () => {
     // Calculate real statistics for department approver
