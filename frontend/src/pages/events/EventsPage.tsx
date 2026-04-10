@@ -10,6 +10,7 @@ import DeleteEventModal from '../../components/DeleteEventModal';
 import { useEventsData } from '../../hooks/useDashboardData';
 import { useAuthStore } from '../../store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
+import api from '../../services/api';
 
 const createEventSchema = z.object({
   title: z.string().min(3, 'Title is required'),
@@ -43,28 +44,14 @@ export default function EventsPage() {
       try {
         setLoadingVenues(true);
         setVenueError(null);
-        const token = localStorage.getItem('access_token');
-        console.log('Fetching venues with token:', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
         
-        const response = await fetch('http://localhost:4000/api/venues', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        console.log('Venues response status:', response.status);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Venues fetched:', data);
-          setVenues(data);
-        } else {
-          const errorText = await response.text();
-          console.error('Venues fetch failed:', response.status, errorText);
-          setVenueError(`Failed to fetch venues: ${response.status} ${errorText}`);
-        }
+        const response = await api.get('/venues');
+        console.log('Venues fetched:', response.data);
+        setVenues(response.data);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         console.error('Failed to fetch venues:', error);
-        setVenueError(`Network error: ${msg}`);
+        setVenueError(`Failed to fetch venues: ${msg}`);
       } finally {
         setLoadingVenues(false);
       }
@@ -84,29 +71,18 @@ export default function EventsPage() {
   const onSubmit = async (data: CreateEventForm) => {
     try {
       setSubmitError(null);
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:4000/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
       
-      if (response.ok) {
-        // Invalidate events cache to trigger refetch
-        await queryClient.invalidateQueries({ queryKey: ['events'] });
-        
-        setRefreshTrigger(prev => prev + 1);
-        reset();
-        // Added success feedback
-      } else {
-        const error = await response.json();
-        setSubmitError(error.error || 'Failed to create event');
-      }
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Failed to create event');
+      const response = await api.post('/events', data);
+      
+      // Invalidate events cache to trigger refetch
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
+      
+      setRefreshTrigger(prev => prev + 1);
+      reset();
+      // Added success feedback
+    } catch (error: any) {
+      const msg = error.response?.data?.error || error.message || 'Failed to create event';
+      setSubmitError(msg);
     }
   };
 
