@@ -107,17 +107,9 @@ export function useTasksData() {
     queryKey: ['tasks'],
     queryFn: async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const response = await fetch('http://localhost:4000/api/tasks', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          return Array.isArray(data) ? data : [];
-        }
-        return mockTasks; // Fallback to mock if API fails
+        const response = await api.get('/tasks');
+        const data = response.data;
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Failed to fetch tasks:', error);
         return mockTasks; // Fallback to mock if network error
@@ -139,49 +131,26 @@ export function useTasksData() {
 
   const updateStatus = async (id: string, status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:4000/api/tasks/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      if (response.ok) {
-        // Invalidate cache to refetch
-        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-        console.log(`✅ Task ${id} updated to ${status}`);
-      } else {
-        const errorData = await response.json();
-        console.error(`❌ Failed to update task: ${response.status}`, errorData);
-      }
-    } catch (error) {
-      console.error('❌ Failed to update task status:', error);
+      const response = await api.patch(`/tasks/${id}/status`, { status });
+      
+      // Invalidate cache to refetch
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      console.log(`✅ Task ${id} updated to ${status}`);
+    } catch (error: any) {
+      const msg = error.response?.data?.error || error.message;
+      console.error(`❌ Failed to update task: ${msg}`, error);
     }
   };
 
   const addTask = async (newTask: { title: string; team: 'Media' | 'Logistics' | 'Tech' | 'Hospitality'; assignee: string; priority: 'Low' | 'Medium' | 'High' }) => {
     try {
-      const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:4000/api/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(newTask),
-      });
-
-      if (response.ok) {
-        // Invalidate cache to refetch
-        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      } else {
-        console.error('Failed to create task');
-      }
-    } catch (error) {
-      console.error('Failed to create task:', error);
+      const response = await api.post('/tasks', newTask);
+      
+      // Invalidate cache to refetch
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    } catch (error: any) {
+      const msg = error.response?.data?.error || error.message;
+      console.error('Failed to create task:', msg);
     }
   };
 
