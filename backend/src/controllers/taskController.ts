@@ -56,14 +56,14 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
       return res.json(updatedTask);
     } else if (req.user.role === 'VOLUNTEER') {
       // Volunteers can update only tasks assigned to them
-      // Check if assignee matches user ID (comparing as strings for flexibility)
-      const assigneeStr = task.assignee?.toString() || '';
-      const userIdStr = req.user._id?.toString() || '';
+      // Compare both as ObjectId strings for consistency
+      const assigneeId = task.assignee?.toString() || '';
+      const userId = req.user._id?.toString() || '';
       
-      console.log(`🔍 Volunteer update check - Task assignee: "${assigneeStr}", User ID: "${userIdStr}"`);
+      console.log(`🔍 Volunteer update check - Task assignee: "${assigneeId}", User ID: "${userId}"`);
       
-      if (assigneeStr !== userIdStr) {
-        return res.status(403).json({ error: `You can only update tasks assigned to you. Task assignee: ${assigneeStr}, Your ID: ${userIdStr}` });
+      if (assigneeId !== userId) {
+        return res.status(403).json({ error: `You can only update tasks assigned to you. Task assignee: ${assigneeId}, Your ID: ${userId}` });
       }
       const updatedTask = await Task.findByIdAndUpdate(id, { status }, { new: true });
       return res.json(updatedTask);

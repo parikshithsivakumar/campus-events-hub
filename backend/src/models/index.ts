@@ -119,7 +119,7 @@ const taskSchema = new mongoose.Schema(
     organizerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
     team: { type: String },
-    assignee: { type: String },
+    assignee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: { type: String, enum: ['TODO', 'IN_PROGRESS', 'DONE'], default: 'TODO' },
     priority: { type: String, enum: ['Low', 'Medium', 'High'], default: 'Medium' },
     dueDate: { type: Date },
