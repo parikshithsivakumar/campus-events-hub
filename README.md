@@ -8,176 +8,85 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18+-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue)](https://www.typescriptlang.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://www.mongodb.com/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 
-[🚀 Quick Start](#quick-start) • [📚 Documentation](#documentation) • [🏗️ Architecture](#architecture) • [🤝 Contributing](#contributing)
+**[🚀 Quick Start](#-quick-start) • [✨ Features](#-features) • [🛠️ Tech Stack](#-tech-stack) • [📖 Docs](#-documentation)**
 
 </div>
 
 ---
 
-## 📋 Table of Contents
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Quick Start](#quick-start)
-- [Project Structure](#project-structure)
-- [Architecture](#architecture)
-- [Role-Based Access Control](#role-based-access-control)
-- [API Endpoints](#api-endpoints)
-- [Environment Setup](#environment-setup)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
+## 💡 What is Campus Events Hub?
+
+A **production-ready** platform for managing college events, approvals, and venue bookings. Built for simplicity, security, and scale.
+
+✨ Enterprise security • 📱 Fully responsive • 🏢 Multi-tenant • ⚡ Scalable • 🎯 6 role-based access system
 
 ---
 
-## 🎯 Overview
+## ✨ Features at a Glance
 
-**Campus Events Hub** is a production-ready SaaS platform for managing college events end-to-end. It provides institutional-grade security, multi-tenant architecture, and a sophisticated approval workflow system. Perfect for colleges and universities looking to streamline event planning, booking, and oversight.
-
-### Why Campus Events Hub?
-
-✨ **Production-Ready** - Built with enterprise-grade best practices  
-🔐 **Secure by Default** - JWT auth, RBAC, rate limiting, input validation  
-📱 **Fully Responsive** - Desktop, tablet, and mobile-optimized interfaces  
-🏢 **Multi-Tenant** - Isolated data per institution with secure scoping  
-⚡ **Scalable** - Stateless services, load-balanced, containerized  
-🎯 **User-Centric** - Intuitive dashboards for all 6 user roles  
-
----
-
-## ✨ Key Features
-
-### 🔐 Authentication & Authorization
-- JWT-based authentication with refresh token rotation
-- 6-role RBAC system: Super Admin, College Admin, Faculty Advisor, Student Organizer, Volunteer, Department Approver
-- Email domain verification for institutional accounts
-- Bcrypt password hashing with configurable cost
-- Rate limiting on sensitive endpoints
-
-### 📅 Event Management
-- Create, update, and manage event proposals
-- Venue management with booking and availability calendar
-- Multi-level approval workflow with comments
-- Event tracking with status monitoring
-- Task assignment and Kanban board
-
-### 📊 Approvals & Oversight
-- Multi-stage approval workflow for events
-- Approval queue with priority management
-- Comments and feedback system
-- Approval analytics and audit trails
-- Configurable approval workflows per institution
-
-### 🏫 Admin Dashboard
-- Real-time analytics and event metrics
-- User and college management
-- Venue administration
-- Reports and data export
-- System configuration and settings
-
-### 📈 Comprehensive Reporting
-- Event analytics and insights
-- Post-event reports and feedback collection
-- Data export capabilities
-- Historical tracking
+🔐 **Authentication** - JWT + RBAC with 6 roles  
+📅 **Event Management** - Create, track, and book venues  
+✅ **Approval Workflow** - Multi-level approvals with audit trails  
+📊 **Dashboard** - Real-time analytics & insights  
+🎯 **Role-Based Access** - Super Admin, College Admin, Faculty Advisor, Student Organizer, Volunteer, Department Approver  
+📱 **Responsive UI** - Works on desktop, tablet, and mobile  
+🐳 **Docker Ready** - Fully containerized for production  
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-| Technology | Purpose |
-|---|---|
-| **React 18+** | Component-based UI framework |
-| **TypeScript** | Type-safe JavaScript |
-| **Vite** | Lightning-fast build tool |
-| **TailwindCSS** | Utility-first CSS styling |
-| **Axios** | HTTP client for API calls |
-| **React Router** | Client-side routing |
-
-### Backend
-| Technology | Purpose |
-|---|---|
-| **Node.js 18+** | JavaScript runtime |
-| **Express.js** | Minimalist web framework |
-| **TypeScript** | Type-safe backend code |
-| **MongoDB** | NoSQL document database |
-| **Prisma** | Modern ORM with type safety |
-| **JWT** | Stateless authentication |
-| **Bcrypt** | Cryptographic password hashing |
-| **Zod** | Schema validation |
-
-### DevOps & Infrastructure
-| Technology | Purpose |
-|---|---|
-| **Docker** | Container platform |
-| **Docker Compose** | Multi-container orchestration |
-| **MongoDB Atlas** | Managed database service |
+**Frontend:** React 18 • TypeScript • Vite • TailwindCSS  
+**Backend:** Node.js • Express • TypeScript • MongoDB • Prisma  
+**DevOps:** Docker • Docker Compose  
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- **Node.js** 18+ and npm/yarn
-- **MongoDB** (local or Atlas connection URL)
-- **Docker** (optional, for containerized deployment)
-
-### 1️⃣ Clone & Install
+### Install & Run (2 minutes)
 
 ```bash
+# Clone repo
 git clone https://github.com/yourusername/campus-events-hub.git
 cd campus-events-hub
 
-# Backend
+# Backend setup
 cd backend
 npm install
+npm run dev
+# ✓ Running on http://localhost:5000
 
-# Frontend
-cd ../frontend
+# Frontend setup (new terminal)
+cd frontend
 npm install
+npm run dev
+# ✓ Running on http://localhost:5173
 ```
 
-### 2️⃣ Environment Setup
+### Environment Setup
 
-**Backend** - Create `backend/.env`:
+**Backend** - `backend/.env`:
 ```env
-DATABASE_URL=mongodb://username:password@cluster.mongodb.net/dbname
-JWT_ACCESS_SECRET=your_access_secret_key
+DATABASE_URL=mongodb://user:pass@cluster.mongodb.net/dbname
+JWT_ACCESS_SECRET=your_secret_key
 JWT_REFRESH_SECRET=your_refresh_secret_key
 NODE_ENV=development
 PORT=5000
-CORS_ORIGIN=http://localhost:5173
 ```
 
-**Frontend** - Create `frontend/.env`:
+**Frontend** - `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### 3️⃣ Run Development Servers
-
-```bash
-# Terminal 1: Backend
-cd backend
-npm run dev
-# ✓ Backend running on http://localhost:5000
-
-# Terminal 2: Frontend
-cd frontend
-npm run dev
-# ✓ Frontend running on http://localhost:5173
-```
-
-### 4️⃣ Access the Application
-
-Open http://localhost:5173 and log in with demo credentials:
-- **Role**: Student Organizer
-- **Email**: organizer@campus.edu
-- **Password**: demo123
+### Demo Login
+- **URL:** http://localhost:5173
+- **Email:** organizer@campus.edu
+- **Password:** demo123
+- **Role:** Student Organizer
 
 ---
 
@@ -185,265 +94,147 @@ Open http://localhost:5173 and log in with demo credentials:
 
 ```
 campus-events-hub/
-├── backend/                    # Express API server
+├── backend/              # API server (Express + TypeScript)
 │   ├── src/
-│   │   ├── config/            # Configuration files
-│   │   ├── controllers/       # Route handlers
-│   │   ├── middlewares/       # Auth, RBAC, rate limiting
-│   │   ├── models/            # Data models
-│   │   ├── routes/            # API routes
-│   │   ├── services/          # Business logic
-│   │   ├── types/             # TypeScript types
-│   │   ├── app.ts            # Express app
-│   │   └── server.ts         # Entry point
-│   ├── prisma/
-│   │   └── schema.prisma     # Database schema
-│   ├── package.json
-│   └── tsconfig.json
+│   │   ├── controllers/  # Route handlers
+│   │   ├── middlewares/  # Auth, RBAC, rate limiting
+│   │   ├── routes/       # API routes
+│   │   ├── services/     # Business logic
+│   │   └── app.ts       # Express app
+│   └── prisma/
+│       └── schema.prisma
 │
-├── frontend/                   # React + Vite app
+├── frontend/             # UI app (React + Vite)
 │   ├── src/
-│   │   ├── components/        # React components
-│   │   ├── pages/             # Route pages
-│   │   ├── services/          # API client
-│   │   ├── store/             # State management
-│   │   ├── types/             # TypeScript types
-│   │   ├── hooks/             # Custom React hooks
-│   │   ├── utils/             # Utility functions
-│   │   ├── App.tsx           # Root component
-│   │   └── main.tsx          # Entry point
-│   ├── package.json
-│   └── tsconfig.json
+│   │   ├── components/   # React components
+│   │   ├── pages/        # Route pages
+│   │   ├── services/     # API client
+│   │   └── App.tsx
 │
-├── docker-compose.yml         # Multi-container setup
-├── README.md                  # This file
-└── LICENSE                    # MIT License
+└── docker-compose.yml    # Multi-container setup
 ```
 
 ---
 
 ## 🏗️ Architecture
 
-### Multi-Tenant Design
-Every table includes a `collegeId` field for strict data isolation. Tenant scoping is enforced at:
-- **Middleware layer** - Extracts `collegeId` from authenticated JWT
-- **Service layer** - All database queries automatically scoped to user's college
-- **Prisma middleware** - Database-level enforcement of tenant boundaries
+### Multi-Tenant & Secure
 
-### Security Architecture
 ```
-Client (Browser)
-    ↓
-Reverse Proxy / Load Balancer
-    ↓
-Express Server (CORS, Helmet, Rate Limiting)
-    ↓
-Auth Middleware → JWT Verification → Extract collegeId
-    ↓
-RBAC Middleware → Check permissions against role
-    ↓
-Route Handler → Tenant-scoped service layer
-    ↓
-MongoDB (row-level data isolation)
+Browser → Load Balancer → Express Server → Auth/RBAC Middleware → MongoDB
+         (CORS, Helmet)   (JWT verified)  (Tenant scoped)      (Row-level isolation)
 ```
 
-### Key Security Features
-- **Input Validation**: All requests validated with Zod schemas
-- **SQL Injection Prevention**: Parameterized queries via Prisma
-- **Authentication**: JWT with short-lived access tokens + refresh token rotation
-- **Authorization**: Role-based permissions enforced per endpoint
-- **Rate Limiting**: Protected endpoints throttled per IP
-- **CORS**: Restricted to approved origins
-- **Security Headers**: Helmet.js for HTTP hardening
-- **Password Hashing**: Bcrypt with configurable cost factor
+**Key Features:**
+- ✅ JWT authentication with refresh tokens
+- ✅ Zod input validation on all endpoints
+- ✅ Role-based permissions per route
+- ✅ Rate limiting (15-min windows)
+- ✅ Bcrypt password hashing
+- ✅ Prepared queries (no SQL injection)
+- ✅ Audit logs for all approvals
 
 ---
 
-## 👥 Role-Based Access Control
+## 🔌 Core API Endpoints
 
-| Role | Capabilities | Restrictions |
-|---|---|---|
-| **Super Admin** | System-wide management, all features | None |
-| **College Admin** | All college operations, user management | Restricted to own college |
-| **Faculty Advisor** | Event approval, review, oversight | Cannot create events |
-| **Student Organizer** | Create events, manage proposals | Cannot approve events |
-| **Volunteer** | View tasks, check assignments | Read-only access |
-| **Department Approver** | Approve events in department | Limited to assigned departments |
-
----
-
-## 🔌 API Endpoints
-
-### Authentication
 ```
-POST   /api/auth/register          Register new account
-POST   /api/auth/login             Login and get tokens
-POST   /api/auth/refresh           Refresh access token
-```
-
-### Events
-```
-GET    /api/events                 List all events
-POST   /api/events                 Create new event
-GET    /api/events/:id             Get event details
-PATCH  /api/events/:id             Update event
-DELETE /api/events/:id             Delete event
-POST   /api/events/:id/approve     Approve event
-POST   /api/events/:id/reject      Reject event
-```
-
-### Approvals
-```
-GET    /api/approvals              List pending approvals
-GET    /api/approvals/:id          Get approval details
-POST   /api/approvals/:id/approve  Approve request
-POST   /api/approvals/:id/reject   Reject request
-```
-
-### Venues
-```
-GET    /api/venues                 List venues
-POST   /api/venues                 Create venue (admin only)
-GET    /api/venues/:id             Get venue details
-PATCH  /api/venues/:id             Update venue (admin only)
-DELETE /api/venues/:id             Delete venue (admin only)
-```
-
-### Reports
-```
-GET    /api/reports                Get event analytics
-GET    /api/reports/approval       Get approval statistics
-```
-
-Full API documentation available at `/api/docs` when server is running.
-
----
-
-## ⚙️ Environment Setup
-
-### Backend Environment Variables
-```env
-# Database
-DATABASE_URL=mongodb+srv://user:pass@cluster.mongodb.net/dbname
-
-# JWT Secrets
-JWT_ACCESS_SECRET=your_secret_access_key
-JWT_REFRESH_SECRET=your_secret_refresh_key
-
-# Server Config
-NODE_ENV=development
-PORT=5000
-CORS_ORIGIN=http://localhost:5173
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# Email (optional)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASSWORD=your_app_password
-```
-
-### Frontend Environment Variables
-```env
-VITE_API_URL=http://localhost:5000/api
-VITE_APP_NAME=Campus Events Hub
+POST   /api/auth/login              Login
+POST   /api/events                  Create event
+GET    /api/events                  List events
+POST   /api/events/:id/approve      Approve event
+GET    /api/approvals               List pending approvals
+GET    /api/venues                  List venues
+POST   /api/venues                  Create venue (admin)
+GET    /api/reports                 Analytics dashboard
 ```
 
 ---
 
-## 📦 Deployment
+## 👥 Roles & Permissions
 
-### Docker Deployment
+| Role | Can Create Events | Can Approve | Can Manage Users |
+|---|---|---|---|
+| Super Admin | ✅ | ✅ | ✅ |
+| College Admin | ✅ | ✅ | ✅ |
+| Faculty Advisor | ❌ | ✅ | ❌ |
+| Student Organizer | ✅ | ❌ | ❌ |
+| Volunteer | ❌ | ❌ | ❌ |
+| Department Approver | ❌ | ✅* | ❌ |
+
+*Limited to assigned departments
+
+---
+
+## 🐳 Docker Deployment
 
 ```bash
-# Build and start with Docker Compose
+# Build and run all services
 docker-compose up --build
 
-# Or build individually
+# Production
 docker build -t campus-events-backend ./backend
 docker build -t campus-events-frontend ./frontend
 ```
 
-### Production Checklist
-- [ ] Use managed PostgreSQL (Neon, Supabase, or Railway)
-- [ ] Configure environment variables in secret manager
-- [ ] Enable HTTPS/TLS everywhere
-- [ ] Set up database backups and retention policies
-- [ ] Configure CDN for static assets
-- [ ] Enable structured logging and monitoring
-- [ ] Set up automated deployments (CI/CD)
-- [ ] Configure health checks and auto-scaling
-- [ ] Review security headers and CORS policies
-- [ ] Test disaster recovery procedures
+---
 
-### Deployment Platforms
+## 📖 Documentation
 
-**Recommended For Backend:**
-- Railway, Render, Fly.io, Heroku, AWS/GCP/Azure
+- **Full Setup Guide:** [SETUP.md](./SETUP.md)
+- **Architecture Details:** [ARCHITECTURE.md](./ARCHITECTURE.md)
+- **API Reference:** Available at `/api/docs` when running
+- **Deployment Guide:** [DEPLOYMENT.md](./DEPLOYMENT.md)
 
-**Recommended For Frontend:**
-- Vercel, Netlify, AWS S3 + CloudFront
+---
+
+## 📦 Production Checklist
+
+- [ ] Use managed MongoDB/PostgreSQL
+- [ ] Configure environment secrets
+- [ ] Enable HTTPS/TLS
+- [ ] Set up database backups
+- [ ] Configure CDN for assets
+- [ ] Enable structured logging
+- [ ] Set up CI/CD pipeline
+- [ ] Configure auto-scaling
+- [ ] Test disaster recovery
+
+**Deploy To:** Railway • Render • Vercel • AWS • GCP • Azure
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+1. Fork the repo
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit: `git commit -m 'Add feature'`
+4. Push: `git push origin feature/amazing-feature`
+5. Open PR
 
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and test thoroughly
-4. Commit with clear messages (`git commit -m 'Add amazing feature'`)
-5. Push to your branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-### Coding Standards
-- Use TypeScript for type safety
-- Follow ESLint/Prettier configuration
-- Write descriptive commit messages
-- Include tests for new features
-- Update documentation as needed
-
-### Bug Reports
-Please file issues with:
-- Clear description of the problem
-- Steps to reproduce
-- Expected vs. actual behavior
-- Screenshots if applicable
-- Environment details (OS, Node version, browser, etc.)
+**Guidelines:** Use TypeScript • Follow ESLint • Write tests • Update docs
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the LICENSE file for details.
+MIT License - [View License](./LICENSE)
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Questions?
 
-Built with ❤️ for college administrators, faculty advisors, and student organizers worldwide.
-
----
-
-## 📞 Support & Questions
-
-- 📧 Email: support@campusevents.com
-- 💬 Discussions: GitHub Discussions
-- 🐛 Bug Reports: GitHub Issues
-- 📚 Documentation: [Full Docs](./docs)
+- 📧 **Email:** support@campusevents.com
+- 💬 **Discussions:** GitHub Discussions
+- 🐛 **Issues:** GitHub Issues
 
 ---
 
 <div align="center">
 
-**[⬆ back to top](#campus-events-hub)**
+Made with 💻 by [Your Team]
 
-Made with 💻 by [Your Name/Organization]
+**[⬆ back to top](#-campus-events-hub)**
 
 </div>
 | **Docker Compose** | Orchestration |
