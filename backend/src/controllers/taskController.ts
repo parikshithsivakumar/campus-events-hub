@@ -13,12 +13,9 @@ const createTaskSchema = z.object({
 
 export const listTasks = async (req: AuthRequest, res: Response) => {
   try {
-    // Only student organizers can create/manage tasks
-    if (req.user.role !== 'STUDENT_ORGANIZER') {
-      return res.status(403).json({ error: 'Only student organizers can manage tasks' });
-    }
-
-    const tasks = await Task.find({ organizerId: req.user._id, deleted: false });
+    // Faculty advisors can view, but only student organizers own tasks
+    // So return all tasks from any student organizer (they can all see each other's tasks)
+    const tasks = await Task.find({ deleted: false });
     res.json(tasks);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import {
@@ -84,14 +84,12 @@ export function useVenuesData() {
 }
 
 export function useTasksData() {
-  const [tasks, setTasks] = useState(mockTasks);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  // Sync with backend on mount
-  useEffect(() => {
-    const syncTasks = async () => {
+  const queryClient = useQueryClient();
+  
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
       try {
-        setIsSyncing(true);
         const token = localStorage.getItem('access_token');
         const response = await fetch('http://localhost:4000/api/tasks', {
           headers: {
@@ -100,18 +98,18 @@ export function useTasksData() {
         });
         if (response.ok) {
           const data = await response.json();
-          setTasks(data);
+          return Array.isArray(data) ? data : [];
         }
+        return mockTasks; // Fallback to mock if API fails
       } catch (error) {
-        console.error('Failed to sync tasks:', error);
-        // Use mock data as fallback
-      } finally {
-        setIsSyncing(false);
+        console.error('Failed to fetch tasks:', error);
+        return mockTasks; // Fallback to mock if network error
       }
-    };
-
-    syncTasks();
-  }, []);
+    },
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
+  });
 
   const grouped = useMemo(
     () => ({
@@ -123,13 +121,9 @@ export function useTasksData() {
   );
 
   const updateStatus = async (id: string, status: 'TODO' | 'IN_PROGRESS' | 'DONE') => {
-    // Update local state immediately
-    setTasks(prev => prev.map(task => (task.id === id ? { ...task, status } : task)));
-
-    // Sync with backend
     try {
       const token = localStorage.getItem('access_token');
-      await fetch(`http://localhost:4000/api/tasks/${id}/status`, {
+      const response = await fetch(`http://localhost:4000/api/tasks/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -137,6 +131,13 @@ export function useTasksData() {
         },
         body: JSON.stringify({ status }),
       });
+
+      if (response.ok) {
+        // Invalidate cache to refetch
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      } else {
+        console.error('Failed to update task status');
+      }
     } catch (error) {
       console.error('Failed to update task status:', error);
     }
@@ -155,25 +156,17 @@ export function useTasksData() {
       });
 
       if (response.ok) {
-        const task = await response.json();
-        setTasks(prev => [...prev, task]);
-        return task;
+        // Invalidate cache to refetch
+        await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      } else {
+        console.error('Failed to create task');
       }
     } catch (error) {
       console.error('Failed to create task:', error);
-      // Fallback to local state
-      const task = {
-        id: Date.now().toString(),
-        ...newTask,
-        status: 'TODO' as const,
-        dueDate: new Date().toISOString().split('T')[0],
-      };
-      setTasks(prev => [...prev, task]);
-      return task;
     }
   };
 
-  return { tasks, grouped, updateStatus, addTask, setTasks, isSyncing };
+  return { grouped, updateStatus, addTask };
 }
 
 export function useReportsData() {
