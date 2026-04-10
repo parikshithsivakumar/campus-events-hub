@@ -37,29 +37,8 @@ export const mockDepartmentApprover: User = {
 };
 
 // Mock volunteer users for task assignment
-export const mockVolunteers: User[] = [
-  {
-    id: 'v-01',
-    name: 'Priya Desai',
-    email: 'priya@demo.edu',
-    role: 'VOLUNTEER',
-    collegeId: 'c-demo',
-  },
-  {
-    id: 'v-02',
-    name: 'Karan Singh',
-    email: 'karan@demo.edu',
-    role: 'VOLUNTEER',
-    collegeId: 'c-demo',
-  },
-  {
-    id: 'v-03',
-    name: 'Neha Gupta',
-    email: 'neha@demo.edu',
-    role: 'VOLUNTEER',
-    collegeId: 'c-demo',
-  },
-];
+// REMOVED: Use real volunteers from backend API (/api/volunteers)
+export const mockVolunteers: User[] = [];
 
 export const mockEvents: EventItem[] = [
   {
@@ -83,7 +62,7 @@ export const mockEvents: EventItem[] = [
     endAt: '2026-04-22T21:00:00.000Z',
     venue: 'Open Amphitheater',
     department: 'Arts Council',
-    organizer: 'Priya Desai',
+    organizer: 'Event Organizer',
     organizerId: 'u-02',
     status: 'APPROVED_FINAL',
     budget: 120000,
