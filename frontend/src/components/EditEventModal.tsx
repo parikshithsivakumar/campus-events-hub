@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Button from './ui/Button';
-import Input from './ui/Input';
-import Card from './ui/Card';
 
 interface EditEventModalProps {
   isOpen: boolean;
@@ -69,61 +68,132 @@ export default function EditEventModal({ isOpen, event, onClose, onEventUpdated 
 
   if (!isOpen) return null;
 
-  return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <Card title="Edit Event" style={{ width: '90%', maxWidth: '600px' }}>
-        {error && <div style={{ color: '#d32f2f', marginBottom: '1rem' }}>{error}</div>}
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-          <Input
-            label="Title"
-            value={formData.title}
-            onChange={e => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-          <Input
-            label="Department"
-            value={formData.department}
-            onChange={e => setFormData({ ...formData, department: e.target.value })}
-          />
-          <label style={{ display: 'grid', gap: '0.25rem' }}>
-            <span>Description</span>
+  return createPortal(
+    <div style={{ 
+      position: 'fixed', 
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      zIndex: 9999,
+      overflowY: 'auto',
+      padding: '1rem'
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '8px',
+        width: '100%',
+        maxWidth: '550px',
+        padding: '2rem',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        margin: 'auto'
+      }}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>Edit Event</h2>
+        </div>
+
+        {error && (
+          <div style={{ 
+            color: '#d32f2f', 
+            backgroundColor: '#ffebee', 
+            padding: '0.75rem', 
+            borderRadius: '4px', 
+            marginBottom: '1rem',
+            fontSize: '0.9rem'
+          }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Title</label>
+            <input
+              type="text"
+              className="input"
+              value={formData.title}
+              onChange={e => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Department</label>
+            <input
+              type="text"
+              className="input"
+              value={formData.department}
+              onChange={e => setFormData({ ...formData, department: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Description</label>
             <textarea
               className="input textarea"
               rows={4}
               value={formData.description}
               onChange={e => setFormData({ ...formData, description: e.target.value })}
             />
-          </label>
-          <Input
-            label="Start"
-            type="datetime-local"
-            value={formData.startAt}
-            onChange={e => setFormData({ ...formData, startAt: e.target.value })}
-            required
-          />
-          <Input
-            label="End"
-            type="datetime-local"
-            value={formData.endAt}
-            onChange={e => setFormData({ ...formData, endAt: e.target.value })}
-            required
-          />
-          <Input
-            label="Budget"
-            type="number"
-            value={formData.budget}
-            onChange={e => setFormData({ ...formData, budget: Number(e.target.value) })}
-          />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Updating...' : 'Update Event'}
-            </Button>
-            <Button variant="secondary" onClick={onClose} type="button">
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Start Date</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.startAt}
+                onChange={e => setFormData({ ...formData, startAt: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>End Date</label>
+              <input
+                type="datetime-local"
+                className="input"
+                value={formData.endAt}
+                onChange={e => setFormData({ ...formData, endAt: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Budget (INR)</label>
+            <input
+              type="number"
+              className="input"
+              value={formData.budget}
+              onChange={e => setFormData({ ...formData, budget: Number(e.target.value) })}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1.5rem' }}>
+            <Button 
+              variant="secondary" 
+              onClick={onClose} 
+              type="button"
+              fullWidth
+            >
               Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              fullWidth
+            >
+              {isSubmitting ? 'Updating...' : 'Update Event'}
             </Button>
           </div>
         </form>
-      </Card>
-    </div>
+      </div>
+    </div>,
+    document.body
   );
 }

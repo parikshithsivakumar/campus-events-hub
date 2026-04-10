@@ -1,7 +1,7 @@
 import Badge from './ui/Badge';
 import Button from './ui/Button';
-import Card from './ui/Card';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ApprovalDetailModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface ApprovalDetailModalProps {
   onClose: () => void;
   onApproveWithData: (feedback: string) => Promise<void>;
   onRejectWithData: (feedback: string) => Promise<void>;
+  canApprove?: boolean;
 }
 
 export default function ApprovalDetailModal({ 
@@ -18,7 +19,8 @@ export default function ApprovalDetailModal({
   approval, 
   onClose, 
   onApproveWithData,
-  onRejectWithData
+  onRejectWithData,
+  canApprove = true
 }: ApprovalDetailModalProps) {
   const [feedback, setFeedback] = useState(approval?.comment || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,20 +61,35 @@ export default function ApprovalDetailModal({
     }
   };
 
-  return (
+  return createPortal(
     <div style={{ 
       position: 'fixed', 
-      inset: 0, 
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       backgroundColor: 'rgba(0,0,0,0.5)', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      zIndex: 1000,
-      overflowY: 'auto'
+      zIndex: 9999,
+      overflowY: 'auto',
+      padding: '1rem'
     }}>
-      <div style={{ width: '90%', maxWidth: '700px', margin: '2rem auto' }}>
-        <Card title="Event Approval Details">
-          <div style={{ display: 'grid', gap: '1.5rem' }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '8px',
+        width: '100%',
+        maxWidth: '650px',
+        padding: '2rem',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+        margin: 'auto'
+      }}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', fontWeight: '600' }}>Event Approval Details</h2>
+        </div>
+
+        <div style={{ display: 'grid', gap: '1.5rem' }}>
           {/* Error Display */}
           {error && (
             <div style={{ 
@@ -138,48 +155,63 @@ export default function ApprovalDetailModal({
             </div>
           )}
 
-          {/* Feedback Input */}
-          <div>
-            <label style={{ display: 'grid', gap: '0.5rem' }}>
-              <strong>Your Approval Feedback</strong>
-              <textarea
-                className="input textarea"
-                rows={4}
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder="Add any conditions, requests for changes, or comments..."
-                disabled={isSubmitting}
-              />
-            </label>
-          </div>
+          {/* Feedback Input & Action Buttons (Only for Approvers) */}
+          {canApprove && (
+            <>
+              <div>
+                <label style={{ display: 'grid', gap: '0.5rem' }}>
+                  <strong>Your Approval Feedback</strong>
+                  <textarea
+                    className="input textarea"
+                    rows={4}
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Add any conditions, requests for changes, or comments..."
+                    disabled={isSubmitting}
+                  />
+                </label>
+              </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
-            <Button 
-              variant="secondary" 
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleReject}
-              disabled={isSubmitting}
-              style={{ background: '#d32f2f' }}
-            >
-              {decision === 'REJECTED' && isSubmitting ? 'Rejecting...' : 'Reject'}
-            </Button>
-            <Button 
-              onClick={handleApprove}
-              disabled={isSubmitting}
-              style={{ background: '#1f7a5d' }}
-            >
-              {decision === 'APPROVED' && isSubmitting ? 'Approving...' : 'Approve'}
-            </Button>
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <Button 
+                  variant="secondary" 
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleReject}
+                  disabled={isSubmitting}
+                  style={{ background: '#d32f2f' }}
+                >
+                  {decision === 'REJECTED' && isSubmitting ? 'Rejecting...' : 'Reject'}
+                </Button>
+                <Button 
+                  onClick={handleApprove}
+                  disabled={isSubmitting}
+                  style={{ background: '#1f7a5d' }}
+                >
+                  {decision === 'APPROVED' && isSubmitting ? 'Approving...' : 'Approve'}
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* Close Button for Non-Approvers */}
+          {!canApprove && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+              <Button 
+                variant="secondary" 
+                onClick={onClose}
+              >
+                Close
+              </Button>
+            </div>
+          )}
         </div>
-      </Card>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -15,7 +15,9 @@ const createEventSchema = z.object({
 
 export const listEvents = async (req: AuthRequest, res: Response) => {
   try {
-    const events = await Event.find({ collegeId: req.user.collegeId, deleted: false }).populate('organizerId venueId');
+    const events = await Event.find({ collegeId: req.user.collegeId, deleted: false })
+      .populate('venueId') // Populate venue details for display
+      .lean(); // Use lean() for better performance since we're just reading
     res.json(events);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -32,7 +34,10 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
       organizerId: req.user._id,
       collegeId: req.user.collegeId,
     });
-    res.json(event);
+    
+    // Populate venue details for response
+    const populatedEvent = await event.populate('venueId');
+    res.json(populatedEvent);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -86,7 +91,7 @@ export const approveEvent = async (req: AuthRequest, res: Response) => {
 
 export const getEventById = async (req: AuthRequest, res: Response) => {
   try {
-    const event = await Event.findById(req.params.id).populate('organizerId');
+    const event = await Event.findById(req.params.id).populate('organizerId').populate('venueId');
     if (!event) return res.status(404).json({ error: 'Event not found' });
     res.json(event);
   } catch (err: any) {

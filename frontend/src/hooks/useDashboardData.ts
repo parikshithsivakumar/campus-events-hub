@@ -18,10 +18,28 @@ export function useEventsData() {
         const res = await api.get('/events');
         // Normalize _id to id for consistency
         const events = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        return events.map((event: any) => ({
-          ...event,
-          id: event._id || event.id,
-        }));
+        return events.map((event: any) => {
+          // Handle organizerId: if it's an object with _id, extract it
+          let organizerId = event.organizerId;
+          if (typeof organizerId === 'object' && organizerId?._id) {
+            organizerId = organizerId._id;
+          } else if (typeof organizerId === 'object' && organizerId?.id) {
+            organizerId = organizerId.id;
+          }
+          
+          // Handle venue: if it's a populated object, extract the name
+          let venue = event.venue || '';
+          if (typeof event.venueId === 'object' && event.venueId?.name) {
+            venue = event.venueId.name;
+          }
+          
+          return {
+            ...event,
+            id: event._id || event.id,
+            organizerId: organizerId || event.organizerId,
+            venue: venue,
+          };
+        });
       } catch (error) {
         console.error('Error fetching events:', error);
         return mockEvents;

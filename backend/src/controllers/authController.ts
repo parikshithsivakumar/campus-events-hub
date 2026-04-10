@@ -41,7 +41,7 @@ export const register = async (req: Request, res: Response) => {
     const access = jwt.sign({ sub: user._id, role: user.role, collegeId: user.collegeId }, process.env.JWT_ACCESS_SECRET || 'dev-access-secret', { expiresIn: '24h' });
     const refresh = jwt.sign({ sub: user._id }, process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret', { expiresIn: '30d' });
 
-    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role, collegeId: user.collegeId } });
+    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role, collegeId: user.collegeId, department: user.department } });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }
@@ -61,7 +61,7 @@ export const login = async (req: Request, res: Response) => {
     const access = jwt.sign({ sub: user._id, role: user.role, collegeId: user.collegeId }, process.env.JWT_ACCESS_SECRET || 'dev-access-secret', { expiresIn: '24h' });
     const refresh = jwt.sign({ sub: user._id }, process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret', { expiresIn: '30d' });
 
-    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role, collegeId: user.collegeId } });
+    res.json({ access, refresh, user: { id: user._id, email: user.email, name: user.name, role: user.role, collegeId: user.collegeId, department: user.department } });
   } catch (err: any) {
     res.status(400).json({ error: err.message });
   }

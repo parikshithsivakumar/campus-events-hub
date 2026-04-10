@@ -121,7 +121,11 @@ export default function ApprovalsPage() {
     } else {
       // Organizers see only their events
       if (user?.role === 'STUDENT_ORGANIZER') {
-        return events.filter((e: any) => e.organizerId === user?.id);
+        return events.filter((e: any) => {
+          // Handle both cases: organizerId as string/ID and organizerId as populated object
+          const organizerId = typeof e.organizerId === 'object' ? e.organizerId?.id || e.organizerId?._id : e.organizerId;
+          return organizerId === user?.id;
+        });
       }
       return [];
     }
@@ -193,6 +197,7 @@ export default function ApprovalsPage() {
         onClose={() => setIsDetailModalOpen(false)}
         onApproveWithData={handleApprove}
         onRejectWithData={handleReject}
+        canApprove={canApprove}
       />
     </div>
   );

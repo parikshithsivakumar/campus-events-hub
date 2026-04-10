@@ -13,7 +13,7 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  collegeId: string;
+  collegeId?: string;
   department?: string;
 }
 
